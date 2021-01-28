@@ -1,0 +1,129 @@
+.input-check
+  position relative
+  display block
+  margin-bottom 20px
+  width 100%
+  shadowBorder(1px, 6px)
+  padding 10px
+  color $colorMain1
+  transition()
+
+  &:hover
+    color $colorMain2
+
+  &--required
+    shadow()
+
+  label
+    flex()
+    justify-content flex-start
+    cursor pointer
+    shadowText()
+
+  input
+    width 1px
+    height 1px
+    opacity 0
+
+  &__box
+    position relative
+    display inline-block
+    margin-right 15px
+    padding 10px
+    width 30px
+    height 30px
+    background-color transparent
+    vertical-align bottom
+    -webkit-appearance none
+    shadowInset()
+
+    &::after
+      content ''
+      top 3px
+      left 3px
+      display block
+      width 25px
+      height 25px
+      shadow($colorMain1, 8px)
+      position absolute
+      transition()
+      transform scale(0)
+
+    +below('xs')
+      padding 7px
+
+  &--reverse &__box
+    margin-left 10px
+
+  &--error &__box
+    border-color $colorRed2
+
+  input:checked + &__box::after
+    transform scale(1)
+
+  &__error
+    position absolute
+    top 100%
+    left 0
+    padding 3px 10px
+    color $colorRed2
+    font-size 15px
+    line-height 22px
+    font-weight bold
+    background-color rgba($colorBlack, .7)
+    border-radius $borderRadius
+
+    +below('xs')
+      left 35px
+
+  &--toggle
+    $radius = 64px
+    flex()
+    width auto
+    padding 0
+    box-shadow none
+    font-weight bold
+
+    label
+      position relative
+      padding 20px
+      font-size 20px
+      line-height 1
+      shadowInset()
+      background-color $colorRecess
+      color $colorGray1
+
+      &
+      &::before
+        border-radius $radius
+
+    & ^[0]__label
+      margin-right 20px
+      color $colorGray1
+
+    & ^[0]__box
+      shadow($colorBack3, 3px, false, $colorBack4)
+      flex()
+      justify-content center
+      position absolute
+      width 50%
+      height 86%
+      top 9%
+      left 5%
+      margin-right 0
+      font-size 24px
+      color $colorMain1
+      transition()
+
+      &::after
+        display none
+
+      &
+      &::before
+        border-radius $radius * .9
+
+    input
+      width 50px
+
+      &:checked + ^[0]__box
+        left 46%

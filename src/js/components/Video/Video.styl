@@ -1,0 +1,88 @@
+.video
+  width 100%
+  height 100%
+  position absolute
+  top 0
+  left 0
+  z-index 1
+  imageFull(110%)
+
+  &--fullscreen
+    position fixed
+    z-index 1000
+
+  &__button
+    position absolute
+    top 50%
+    left 50%
+    transform translate(-50%, -50%)
+    cursor pointer
+    z-index 10
+
+    svg
+      border-radius 50%
+      box-shadow 0 0 10px rgba(0, 0, 0, .5)
+      cursor pointer
+      width 100px
+      height 100px
+
+      +below('xs')
+        width 60px
+        height 60px
+
+    &--small
+      svg
+        width 60px
+        height 60px
+
+  &__player
+    position absolute
+    top 0
+    left 0
+
+    &-wrapper
+      width 100%
+      height 100%
+
+      & > *
+        height 100%
+
+  &__mark
+    position absolute
+    top 3px
+    bottom 3px
+    right 0
+
+    &::before
+      content ''
+      display block
+      width 2px
+      margin-left -1px
+      height 100%
+      background-color grey
+
+    &-text
+      display block
+      width 120px
+      white-space normal
+      textCompressed(13px)
+      padding-bottom 5px
+
+  .plyr
+    &__tooltip
+      background-color $colorGray2
+      color $colorWhite
+      font-size 11px !important
+      $radius = 5px
+      border-radius $radius $radius 0 $radius
+
+    & > [data-plyr=play]
+      display none !important
+
+    &--full-ui input[type=range]
+      color $colorMain1
+
+    &__control:hover
+    &__control[aria-expanded=true]
+    &__control[role=menuitemradio][aria-checked=true]::before
+      background-color $colorMain1 !important

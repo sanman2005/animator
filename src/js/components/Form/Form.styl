@@ -1,0 +1,77 @@
+.form
+  $buttonsPadding = 10px
+
+  position relative
+  flex()
+
+  &__buttons
+    flex(row, nowrap, space-between, stretch)
+    margin-left -($buttonsPadding)
+    margin-right -($buttonsPadding)
+    width 'calc(100% + %s)' % ($buttonsPadding * 2)
+
+  &__button
+    margin 0 $buttonsPadding
+
+  &--error
+    & ^[0]__button--main .button
+      &:hover
+        background-color $colorRed1
+
+  &__error
+    width 100%
+    margin $columnPadding 0
+    padding 10px
+    border-radius $borderRadius
+    text-align center
+    error()
+
+  &__title
+    width 100%
+    itemTitle()
+
+  &__input
+    position relative
+    padding 20px
+
+    .input
+    .input-check
+      max-width 60%
+      min-height 64px
+      margin auto
+
+      &:not([data-value='']) input:not(:focus) ~ .input__mark
+        display none
+
+      input
+        border none
+
+      input:focus ~ .input__mark
+        left auto
+        right -29px
+        border-left-color $colorWhite
+        border-right-color transparent
+
+      &__mark
+        width 30px
+        height 30px
+        border 15px solid transparent
+        border-right-color $colorWhite
+        left -29px
+        top 30%
+
+      &__error
+        top calc(100% + 50px)
+        left -70px
+
+    .input-check
+      padding 10px 15px
+      background-color $colorWhite
+
+      label
+        align-items center
+
+    .datetime
+      &__time
+        align-self flex-start
+        margin-top 5px

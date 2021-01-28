@@ -1,0 +1,109 @@
+rupture.scale = 0 $breakPointSmall $breakPointMedium $breakPointLarge
+rupture.scale-names = 'xs' 'sm' 'md' 'lg'
+rupture.anti-overlap = true
+
+// Resets
+::selection
+  color black
+  background-color gray
+
+:root
+  theme-main()
+
+html
+body
+  /* for fix Safari artefact bug */
+  text-rendering optimizeLegibility
+
+body
+  font-family $fontMain
+  background-color $colorBackMain
+  color $colorTextMain
+  scrollbar()
+  overflow-x hidden
+
+  +below('md')
+    theme-md()
+
+  +below('xs')
+    theme-xs()
+
+  &.theme-dark
+    theme-dark()
+
+  &.fixed
+    position fixed
+    overflow hidden
+
+    .layout
+      min-height 0
+
+    main
+    footer
+      display none
+
+*
+*:before
+*:after
+  box-sizing border-box
+
+main
+  flex(column, nowrap, stretch, stretch)
+  margin-bottom auto
+  margin-top auto
+  overflow hidden
+  flex-grow 1
+  padding $headerHeight 0 0
+
+.title
+  padding-bottom 42px
+  margin 0
+  text-align center
+  itemTitle(uppercase)
+  theme(--color-title)
+
+  +below('sm')
+    textSize(25px)
+    padding-bottom 22px
+
+  +below('xs')
+    textSize(20px)
+
+.no-scroll
+  overflow hidden
+
+for size in 'lg' 'md' 'sm' 'xs'
+  .hide-below-{size}
+    +below(size)
+      display none !important
+
+  .hide-above-{size}
+    +above(size)
+      display none !important
+
+.description
+  margin 0
+  font-size 20px
+  line-height 30px
+  max-width 94%
+
+  +below('xs')
+    font-size 15px
+    line-height 22px
+    letter-spacing 0.01em
+    max-width 100%
+
+.fade
+  &-enter
+    opacity 0.01
+
+  &-enter.fade-enter-active
+    opacity 1
+    transition opacity 300ms ease-in
+
+  &-exit
+    opacity 1
+
+  &-exit.fade-exit-active
+    opacity 0.01
+    transition: opacity 300ms ease-in

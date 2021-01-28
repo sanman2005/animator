@@ -1,0 +1,17 @@
+{
+  "automock": false,
+  "passWithNoTests": true,
+  "rootDir": "config",
+
+  "projects": [
+    {
+      "displayName": "test",
+      "preset": "ts-jest"
+    },
+    {
+      "displayName": "lint",
+      "runner": "jest-runner-tsc",
+      "testMatch": ["/**/*test.tsx"]
+    }
+  ]
+}

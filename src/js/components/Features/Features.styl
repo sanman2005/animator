@@ -1,0 +1,74 @@
+.features
+  padding-top 77px
+
+  +above('sm')
+    width auto !important
+
+    .slick
+      &-track
+        justify-content space-between
+
+      &-slide
+        //width auto !important
+
+  .slider
+    &__pagination
+      +above('sm')
+        display none !important
+
+    &__arrow
+      display none
+
+
+.feature
+  display flex !important
+  justify-content space-between
+
+  +below('xs')
+    justify-content center
+
+  &__icon
+    max-width 78px
+
+    img
+      display block
+      max-width 100%
+
+  &__content
+    padding-left 30px
+    max-width 260px
+
+  &__title
+    itemTitle()
+    color $colorGray1
+    text-transform uppercase
+
+    +below('xs')
+      font-size 30px
+      line-height 35px
+      max-width 165px
+
+  &__desc
+    padding-top 10px
+    font-size 15px
+    line-height 22px
+
+    +above('sm')
+      padding-top 17px
+      font-size 20px
+      line-height 30px
+
+.class-features
+  $indent = 10px
+  padding-bottom 45px
+
+  .features
+    margin-left -($indent)
+    margin-right -($indent)
+
+  .slick-slider .slick-slide > div
+    padding 0 $indent
+
+  .feature__content
+    padding-left 20px
+    max-width 310px

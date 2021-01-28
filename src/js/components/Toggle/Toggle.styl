@@ -1,0 +1,387 @@
+.toggle
+  padding 42px 20px 43px 20px
+  border-bottom 2px solid
+  textSize(40px)
+  theme(--color-border, border-color)
+
+  +below('xs')
+    padding 20px 0 23px 0
+    textSize(30px)
+    letter-spacing 0.01em
+
+  &__head
+    width: 100%
+    display flex
+    flex-direction row
+    flex-wrap nowrap
+    justify-content flex-start
+    cursor pointer
+
+  &__body
+    max-height 0
+    transition all 0.5s ease-out
+    overflow hidden
+    margin-left 96px
+    margin-right 100px
+    font-size 20px
+    line-height 30px
+
+    +below('xs')
+      margin-top 14px
+      margin-left 36px
+      margin-right 10px
+      font-size 15px
+      line-height 22px
+
+    & > p:not(:last-child)
+      margin-bottom 30px
+
+  &--opened &__body
+    max-height 1000px
+    margin-top 40px
+
+  &__number
+    min-width 96px
+
+    &::before
+      color $colorGray6
+      content counter(item, decimal-leading-zero)
+      counter-increment item
+
+    +below('xs')
+      min-width 35px
+
+  &__title
+    flex-grow 1
+    max-width 80%
+    theme(--color-dark)
+
+  &__description
+    margin-top 10px
+    margin-left 96px
+    max-width 80%
+    font-size 15px
+    line-height 25px
+    opacity 0.7
+    overflow hidden
+    transition()
+    theme(--color-text)
+
+    +below('xs')
+      line-height 22px
+      margin-left 35px
+
+  &__button
+    margin-left 96px
+    cursor pointer
+    margin-top 30px
+    color $colorGray5
+    textCompressed(25px, uppercase)
+
+    +below('xs')
+      textSize(20px)
+      letter-spacing 0.03em
+      margin-left 35px
+
+  &__icon
+    margin-left auto
+    position relative
+    top -3px
+    width 50px
+
+    +below('xs')
+      width 20px
+      height 20px
+      top 9px
+
+    &::before
+    &::after
+      content ''
+      display block
+      position absolute
+      background-color $colorMain1
+      transition all 1s ease-out
+
+    &::before
+      width 2px
+      height 50px
+      top 0
+      left 24px
+
+      +below('xs')
+        height 20px
+        left 9px
+
+    &::after
+      width 50px
+      height 2px
+      top 24px
+      left 0
+
+      +below('xs')
+        width 20px
+        top 9px
+
+  &--opened > .toggle__head .toggle__icon::before
+    transform rotate(90deg)
+
+.toggle--fake
+  padding 36px 0 32px 0
+  border-bottom none
+
+  +below('xs')
+    padding 24px 0 30px 0
+
+  .toggle__head
+    cursor initial
+
+    +below('xs')
+      margin-bottom 10px
+
+  .toggle__number
+    min-width 60px
+
+    +below('xs')
+      min-width 35px
+
+  .toggle__body
+    margin-top 0
+    margin-left 60px
+    margin-right 0
+    letter-spacing initial
+
+    +below('xs')
+      margin-left 0
+      margin-top 0
+
+  .toggle__icon
+    top 0
+    +below('xs')
+      left 0 !important
+
+.toggle--small
+  padding 26px 0 24px 0
+  textSize(25px)
+
+  .toggle__title
+    textSize(20px)
+    letter-spacing 0.03em
+
+  .toggle__body
+    margin-left 35px
+
+  .toggle__icon
+    width 30px
+    height 30px
+
+    +below('xs')
+      width 20px
+      height 20px
+      top 5px
+      left 4px
+
+    &::before
+      width 2px
+      height 30px
+      top 0
+      left 14px
+
+      +below('xs')
+        height 20px
+        left 9px
+
+    &::after
+      width 30px
+      height 2px
+      top 14px
+      left 0
+
+      +below('xs')
+        width 20px
+        top 9px
+
+  .toggle__title:hover
+    color $colorMain1
+
+  .toggle__body
+    width 96%
+
+.toggle--small.toggle--opened
+  .toggle__icon::before
+    transform rotate(90deg)
+
+.toggle--fake .toggle--small
+  +below('xs')
+    padding 20px 0 20px 0
+
+  .toggle__head
+    cursor pointer
+    +below('xs')
+      margin-bottom 0
+
+  .toggle__body
+    margin-left 0
+
+    +below('xs')
+      width 84%
+      padding-left 35px
+      padding-top 20px
+      letter-spacing 0.01em
+
+  .toggle__title
+    textSize(25px)
+    letter-spacing 0.02em
+    +below('xs')
+      textSize(20px)
+      letter-spacing 0.03em
+      padding-left 35px
+
+.toggle--mobile-lessons
+  padding 25px 15px
+  border-bottom none
+  background-color $colorGray2
+
+  .toggle__number
+    display none
+
+  .toggle__title
+    textSize(30px)
+    letter-spacing 0.01em
+    color $colorGray1
+
+  .toggle__body
+    margin-left 0
+    margin-right 0
+
+  .toggle__icon
+    width 30px
+    height 30px
+    top 3px
+    left -8px
+
+    &::before
+      width 2px
+      height 30px
+      top 0
+      left 14px
+
+    &::after
+      width 30px
+      height 2px
+      top 14px
+      left 0
+
+  &.toggle--opened .toggle__title
+    color $colorWhite
+
+  &.toggle--opened .toggle__head
+    padding-left 15px
+    padding-right 15px
+
+  &.toggle--opened
+    padding-left 0
+    padding-right 0
+
+  .lesson
+    &__preview
+      border none
+
+    &-card
+      &--active
+        background-color $colorGray3
+
+      &__num
+        opacity 0.5
+
+.toggle--lesson
+  &:not(.toggle--opened)
+    .toggle__description
+      max-height 0
+      margin-top 0
+
+    .toggle__body
+      margin-top 0
+
+  .toggle__description
+    +below('xs')
+      max-height 100vh
+      max-width 90%
+      margin-top 14px
+
+  .toggle__body
+    +below('xs')
+      margin-left 0
+      margin-right 0
+      margin-top 30px
+
+  .toggle__icon
+    +below('xs')
+      top 6px
+
+  .toggle__button
+    theme(--color-toggle-lesson)
+
+  .toggle__number:before
+    theme(--color-toggle-lesson)
+
+.toggle--completed
+  .toggle__number
+  .toggle__title
+  .toggle__description
+    opacity .5
+
+  .toggle__icon
+    border-radius 50%
+    border 2px solid $colorMain1
+    height 50px
+
+    &::after
+      width 20px
+      height 13px
+      border-left 2px solid $colorMain1
+      border-bottom 2px solid $colorMain1
+      background-color transparent
+      top 45%
+      left 50%
+      transform translate(-50%, -50%) rotate(-45deg)
+
+    &::before
+      display none
+
+    +below('xs')
+      width 30px
+      height 30px
+
+      &::after
+        width 12px
+        height 6px
+        top 45%
+        left 50%
+        transform translate(-50%, -50%) rotate(-45deg)
+
+    &:not(.toggle--opened)
+      .toggle__title
+        theme(--color-title)
+
+      .toggle__number
+        opacity .5
+
+.toggle--fake .toggle--small
+  .toggle__body
+    max-height 0
+
+  &.toggle--opened
+    .toggle__body
+      max-height 500px
+      margin-top 22px
+
+.theme-dark
+  .toggle--lesson
+    &:hover
+      +above('sm')
+        background-color $colorGray7
+        cursor pointer
+
+    &.toggle--opened
+      background-color transparent
+      cursor initial

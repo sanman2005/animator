@@ -1,0 +1,76 @@
+.select
+  position relative
+  display block
+  margin-bottom 20px
+  width 100%
+  color $colorBlack
+  font-weight 400
+  font-size 20px
+  line-height 30px
+  cursor pointer
+  border 2px solid transparent
+
+  &__triangle
+    position absolute
+    right 20px
+    top 50%
+    line-height 0
+    pointer-events none
+
+    &--opened
+      transform rotateZ(180deg)
+
+  &_opened .input input
+    border 2px solid rgba($colorMain1, 0.4)
+
+  &__text
+    position absolute
+    top 16px
+    left 16px
+    pointer-events none
+
+  .input
+    margin-bottom 0
+
+  input
+    color transparent
+    cursor pointer
+    border 2px solid transparent
+
+  &__error
+    position absolute
+    top 5px
+    right 10px
+    color $colorRed2
+    font-weight bold
+    font-size 14px
+
+  &__items
+    position absolute
+    top calc(100% + 10px)
+    left 0
+    display block
+    padding 10px
+    width 100%
+    max-height 200px
+    transition()
+    scrollbar()
+    z-index 1
+    border none
+    border-radius $borderRadius
+
+  &:not(&_opened) &__items
+    padding 0
+    max-height 0
+    border-bottom none
+
+  &__item
+    padding-bottom 10px
+    cursor pointer
+
+    &:hover
+    &--selected
+      font-weight bold
+
+  .input__mark
+    right 50px

@@ -1,0 +1,22 @@
+.navigation
+
+  ul
+    width 100%
+    shadowBorder()
+    padding 0 $columnPadding
+
+  li
+    padding 10px 0
+
+  .link
+    flex()
+    shadow()
+    justify-content center
+    text-align center
+    padding 5px 10px
+    min-height 3em
+    font-weight bold
+
+    &--active
+      shadowInset()
+      pointer-events none

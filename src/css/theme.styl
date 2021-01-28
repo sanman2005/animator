@@ -1,0 +1,117 @@
+theme-main()
+  --color-back $colorGray3
+  --color-back-light lighten($colorGray3, 50%)
+  --color-back2 rgba($colorBlack, .7)
+  --color-back3 $colorWhite
+  --color-back4 darken($colorWhite, 20%)
+
+  //shadows
+  --color-shadow-light $colorWhite
+  --color-shadow-light-weak rgba($colorWhite, 1)
+  --color-shadow-light-weak-text rgba($colorWhite, .3)
+  --color-shadow-dark rgba($colorGray6, .8)
+  --color-shadow-dark-weak rgba($colorGray1, .5)
+  --color-shadow-dark-weak-text rgba($colorGray6, .9)
+  --color-shadow-self rgba($colorGray6, .9)
+
+  --color-text $colorBlack
+  --color-text2 $colorWhite
+  --color-dark $colorBlack
+  --color-title $colorMain1
+  --color-name inherit
+  --color-error $colorRed2
+
+  --color-back-modal $colorWhite
+
+  --color-button-light $colorGray6
+
+  --color-link $colorMain2
+  --color-link-dark $colorBlack
+  --color-link-hover $colorBlack
+
+  --color-header-back $colorWhite
+  --color-header-enter inherit
+
+  --color-notifications $colorGray5
+  --color-notification-new $colorWhite
+
+  --color-footer-link inherit
+  --color-footer-made rgba($colorBlack, .5)
+
+  --color-toggle-lesson $colorGray6
+
+  --color-recess rgba($colorGray6, .9)
+
+  --color-border $colorGray6
+
+  --color-sms $colorGray6
+
+  --wrapper-padding-top 0
+
+  --back-filter grayscale(1) brightness(1.5) contrast(.5)
+
+  --padding $columnPaddingLg
+
+  --header-height 96px
+
+
+theme-dark()
+  --color-back $colorGray2
+  --color-back-light lighten($colorGray2, 10%)
+  --color-back2 rgba($colorGray4, .7)
+  --color-back3 $colorGray2
+  --color-back4 darken($colorGray2, 20%)
+
+  //shadows
+  --color-shadow-light rgba($colorGray7, .3)
+  --color-shadow-light-weak rgba($colorGray7, .8)
+  --color-shadow-light-weak-text rgba($colorGray7, .8)
+  --color-shadow-dark rgba($colorBlack, .8)
+  --color-shadow-dark-weak rgba($colorBlack, .8)
+  --color-shadow-dark-weak-text rgba($colorBlack, .9)
+  --color-shadow-self rgba($colorWhite, .5)
+
+  --color-text $colorGray1
+  --color-text2 $colorGray7
+  --color-dark $colorWhite
+  --color-title $colorMain1
+  --color-name $colorWhite
+  --color-error $colorRed3
+
+  --color-back-modal $colorBlack
+
+  --color-button-light $colorGray1
+
+  --color-link-dark $colorGray1
+  --color-link-hover $colorWhite
+
+  --color-header-back $colorBlack
+  --color-header-enter rgba($colorGray1, .2)
+
+  --color-notifications $colorBlack
+  --color-notification-new $colorGray2
+
+  --color-footer-link $colorWhite
+  --color-footer-made rgba($colorGray1, .5)
+
+  --color-toggle-lesson rgba($colorGray1, .5)
+
+  --color-recess rgba($colorGray2, .9)
+
+  --color-border $colorGray7
+
+  --color-sms rgba($colorGray1, .5)
+
+  --wrapper-padding-top 80px
+
+  --back-filter grayscale(1)
+
+theme-md()
+  --padding $columnPaddingLg
+
+theme-xs()
+  --padding $columnPaddingXs
+  --header-height 60px
+
+theme($name, $prop = color)
+  {$prop} var($name) // через css-переменные

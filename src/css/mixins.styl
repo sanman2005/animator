@@ -1,0 +1,235 @@
+@import 'vars'
+
+flex($direction = row, $flexWrap = wrap, $justify = space-between, $align = center)
+  display flex
+  flex-direction $direction
+  flex-wrap $flexWrap
+  justify-content $justify
+  align-items $align
+
+page()
+  flex(column, nowrap, center, center)
+  flex-grow 1
+  width 100vw
+
+back($image)
+  position relative
+
+  &::before
+    content ''
+    position fixed
+    fullSize()
+    background-size cover
+    background-position center center
+    background-attachment fixed
+    background-image $image
+    filter $backFilter
+    z-index -1
+
+gradient($color, $colorDark)
+  background-image linear-gradient(145deg, $color, $colorDark)
+
+shadowSimple()
+  filter drop-shadow(2px 2px 2px rgba($colorBlack, .5))
+
+shadowText(inverse = false)
+  will-change text-shadow
+
+  if inverse
+    text-shadow -1px -1px 2px $colorShadowLightWeakText, 1px 1px 2px $colorShadowDarkWeakText
+  else
+    text-shadow 1px 1px 2px $colorShadowLightWeakText, -1px -1px 2px $colorShadowDarkWeakText
+
+shadowInset($size = 5px)
+  border-radius $borderRadius
+  box-shadow inset $size $size ($size * 2) $colorShadowDarkWeak, inset (-($size)) (-($size)) ($size * 2) $colorShadowLightWeak
+  will-change box-shadow
+  shadowText(true)
+
+  &::before
+    content ''
+    position absolute
+    fullSize()
+    border 1px solid $colorBackMain
+    border-radius $borderRadius
+    box-shadow 1px 1px 2px $colorShadowDark, -1px -1px 2px $colorShadowLight
+    pointer-events none
+
+shadow($color = $colorShadowLight, $size = 7px, withHover = false, $colorDark = null)
+  position relative
+  border-radius $borderRadius
+  shadowText()
+  border none
+  will-change box-shadow
+
+  if withHover
+    &:hover
+      shadowInset($size * 0.6)
+
+  if $colorDark
+    gradient($color, $colorDark)
+
+  $lightShadow = (-($size * .8)) (-($size * .5)) max(4px, $size * .7) $colorShadowLight
+  $darkShadow = ($size * .8) ($size * .5) max(4px, $size * .7) $colorShadowDark
+  $ownShadow = 0 0 $size $color
+  $shadow = $lightShadow, $darkShadow, $ownShadow
+
+  if $colorDark
+    box-shadow $shadow, inset 0 0 min($size * 2, 10px) var(--color-shadow-self)
+  else
+    box-shadow $shadow
+
+shadowBorder($size = 1px, $radius = $borderRadius, $inverse = false)
+  if $inverse
+    box-shadow $size $size ($size * 2) $colorShadowDark, (-($size)) (-($size)) ($size * 2) $colorShadowLight
+  else
+    box-shadow $size $size ($size * 2) $colorShadowLight, (-($size)) (-($size)) ($size * 2) $colorShadowDark
+
+  border-radius $radius
+  border none
+
+contentBox($inverse = false)
+  background-color $colorBackMain
+  shadowBorder(1px, $borderRadius, $inverse)
+
+transition($property = all, $duration = $transition, $function = ease)
+  transition $property $duration $function
+
+  if $property != all
+    will-change $property
+
+fullSize()
+  top 0
+  left 0
+  right 0
+  bottom 0
+
+pageHeading()
+  textSize(50px)
+  font-weight 500
+  margin-bottom 15px
+
+  +below('xs')
+    textSize(40px)
+    margin-bottom 20px
+
+image(width = none, height = none)
+  max-width width
+  max-height height
+  flex-shrink 0
+
+  img
+    display block
+    max-width 100%
+
+imageFull($maxHeight = none)
+  display flex
+  justify-content center
+  align-items center
+  overflow hidden
+
+  picture
+    width 100%
+    height 100%
+    display flex
+    justify-content center
+    align-items center
+    overflow hidden
+
+  img
+    display block
+    flex-shrink 0
+    min-width 100%
+    min-height 100%
+    max-height $maxHeight
+
+itemTitle($textTransform = none)
+  textCompressed(30px, $textTransform)
+  shadowText()
+
+  +below('xs')
+    textSize(16px)
+
+itemDesc($textTransform = uppercase)
+  textCompressed(20px, $textTransform)
+
+  +below('xs')
+    textSize(11px)
+
+tag()
+  background-color rgba($colorWhite, .1)
+  color $colorMain2
+  padding 3px 6px
+  border-radius $borderRadius
+  font-size 12px
+  margin-right 10px
+
+textCompressed($size, $textTransform = none)
+  textSize($size)
+  text-transform $textTransform
+  letter-spacing 0.02em
+  font-weight bold
+
+textSize($size)
+  font-size $size
+  line-height $size + 5
+
+scrollbar($color = $colorGray1, $colorBack = transparent)
+  overflow auto
+
+  &::-webkit-scrollbar
+    width 6px
+    height @width
+    margin-right 10px
+    right 10px
+
+  &::-webkit-scrollbar-track
+    background-color $colorShadowDark
+    border-radius $borderRadius
+
+  &::-webkit-scrollbar-thumb
+    background-color $colorMain1
+    border-radius $borderRadius
+
+    &:hover
+      background-color $colorGray1
+
+crossStick($angle = 45deg, $color = $colorMain1)
+  linear-gradient($angle, transparent 42%, $color 42%, $color 58%, transparent 58%)
+
+cross($color = $colorMain1)
+  flex(column, nowrap, stretch, stretch)
+
+  &::after
+    content ''
+    flex-grow 1
+    background-image crossStick(45deg, $color), crossStick(-45deg, $color)
+    filter drop-shadow(0 0 2px $color)
+
+error()
+  position relative
+  background-color $colorBack2
+  theme(--color-error)
+  shadowInset(2px)
+  text-shadow none
+  font-weight bold
+
+rotation($reverse = false)
+  animation $rotationTime linear ($reverse ? reverse anim_rotation_reverse : anim_rotation)
+
+rotationAnimation()
+  0%
+    transform $perspective rotateY(0)
+  49.9%
+    transform $perspective rotateY(-90deg)
+  50%
+    transform $perspective rotateY(90deg)
+  100%
+    transform $perspective rotateY(0)
+
+
+@keyframes anim_rotation
+  rotationAnimation()
+
+@keyframes anim_rotation_reverse
+  rotationAnimation()

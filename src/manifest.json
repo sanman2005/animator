@@ -1,0 +1,13 @@
+{
+  "name": "Animator",
+  "short_name": "Animator",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F1F5F8",
+  "theme_color": "#5883ab",
+  "splash_pages": null,
+  "related_applications": [{
+    "platform": "web",
+    "url": "."
+  }]
+}

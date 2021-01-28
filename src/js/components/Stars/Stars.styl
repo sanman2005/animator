@@ -1,0 +1,48 @@
+.stars
+  &-wrapper
+    display flex
+
+  &--choosing
+    .star--hovered
+      cursor pointer
+
+      path
+        stroke white
+        stroke-width 2px
+
+.star
+  position relative
+  margin-right 4px
+
+  +below('xs')
+    margin-right 2px
+
+  &:nth-child(5)
+    margin-right 0
+
+  &--choosed
+    svg
+      fill white
+    path
+      stroke white
+
+    +below('xs')
+      svg
+        fill $colorMain1
+      path
+        stroke $colorMain1
+
+  .tooltip
+    position absolute
+    top -45px
+    left -28px
+    width auto
+    padding 8px 10px
+    height 30px
+    background-color $colorMain1
+    border-radius $borderRadius
+    font-size 20px
+    line-height 20px
+    letter-spacing 0.02em
+    text-transform uppercase
+    color white

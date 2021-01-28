@@ -1,0 +1,47 @@
+.switcher
+  border-radius $borderRadius
+  padding 13px 20px
+  color $colorTextMain2
+  transition()
+  text-decoration none
+  text-align center
+  shadow($colorShadowLight, 2px)
+
+  &-list
+    flex()
+
+  &__item
+    flex-grow 1
+    padding 5px 10px
+
+    &:not(&--active)
+      shadowBorder(1px, $borderRadius, true)
+
+    &--active
+      shadowBorder()
+      pointer-events none
+
+  &--compact
+    width max-content
+    padding 0
+
+    & ^[0]__item
+      padding 20px
+
+      &:not(^[0]__item--active)
+        shadow($colorShadowLight, 4px)
+        color $colorMain1
+        transition()
+
+        &:hover
+          box-shadow none
+          color $colorMain2
+
+    & ^[0]-list__item
+      &:not(:first-child) ^[0]__item
+        border-bottom-left-radius 0
+        border-top-left-radius 0
+
+      &:not(:last-child) ^[0]__item
+        border-bottom-right-radius 0
+        border-top-right-radius 0

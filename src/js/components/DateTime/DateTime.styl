@@ -1,0 +1,216 @@
+.datetime
+  $calendarWidth = 220px
+  $animationTime = .5s
+  $animationPage = $animationTime steps(1) running datetime-page
+  $animationRollTop = $animationTime linear running datetime-roll-top
+  $animationRollBottom = $animationTime linear running datetime-roll-bottom
+
+  arrow($rotation = 0)
+    transform rotateZ($rotation)
+
+    &:hover
+      transform rotateZ($rotation) scale(1.2)
+
+
+  position relative
+  width 100%
+
+  &__calendar
+    position relative
+    flex(row, wrap, flex-start, stretch)
+
+    &-prev
+      position absolute
+      flex(row, nowrap, flex-end, stretch)
+      fullSize()
+      width $calendarWidth * 2
+      pointer-events none
+      z-index 1
+
+      & ^[0]__date
+        transform scaleX(-1)
+
+    &--animation
+      &-left
+      &-right
+        & ^[1]-prev
+          animation $animationTime linear running datetime-turn
+
+          & ^[0]__date
+            position absolute
+            fullSize()
+            left auto
+            animation $animationPage
+
+          & ^[0]__days
+            animation $animationPage
+            animation-direction reverse
+
+      &-right
+        & ^[1]-prev
+          animation-direction reverse
+
+          & ^[0]__date
+            animation-name datetime-page-reverse
+
+          & ^[0]__days
+            opacity 0
+            animation-name datetime-page-reverse
+
+  &__date
+    width 100%
+    max-width $calendarWidth
+    padding 20px 5px
+    background-color $colorMain1
+    flex(column)
+    color $colorWhite
+    border-radius $borderRadius 0 0 $borderRadius
+
+    label
+      font-size 20px
+
+  &__day
+    font-size 50px
+    font-weight bold
+
+  &__month
+    width 100%
+    flex(row, nowrap)
+    font-size 25px
+    font-weight bold
+
+  &__year
+    min-width 190px
+    flex(row, nowrap)
+    font-size 30px
+    font-weight bold
+
+  &__left
+  &__right
+  &__up
+  &__down
+    border .5em solid transparent
+    border-right-color $colorGray6
+    cursor pointer
+    transition()
+
+  &__left
+    arrow()
+
+  &__right
+    arrow(180deg)
+
+  &__up
+    margin-bottom 20px
+    arrow(90deg)
+
+  &__down
+    margin-top 20px
+    arrow(-90deg)
+
+  &__days
+    flex()
+    justify-content flex-start
+    width 100%
+    max-width $calendarWidth
+    padding 10px
+    background-color $colorMain2
+    border-radius 0 $borderRadius $borderRadius 0
+
+    &-item
+      width calc(100% / 7)
+      min-height 27px
+      margin 5px 0
+      padding 2px 0
+      color $colorWhite
+      text-align center
+      border 2px solid transparent
+      transition()
+      cursor pointer
+
+      &:hover
+        transform scale(1.2)
+        font-weight bold
+
+      &--selected
+        border-color $colorMain3
+        font-weight bold
+
+      &--today
+        background-color darken($colorMain2, 20%)
+
+  &__locked
+    pointer-events none
+    opacity .4
+
+  &__time
+    flex()
+    flex-grow 1
+    background-color $colorMain3
+    padding 0 20px
+    color $colorWhite
+    font-size 30px
+    font-weight bold
+    align-self center
+    border-radius 0 $borderRadius $borderRadius 0
+
+    span
+      width 100%
+      flex(column, nowrap, center, center)
+
+    &-prev
+      position absolute
+      fullSize()
+
+    &--animation
+      &-up
+        & ^[1]-next
+          animation $animationRollBottom
+
+        & ^[1]-prev
+          animation $animationRollTop
+
+      &-down
+        & ^[1]-next
+          animation $animationRollTop
+          animation-direction reverse
+
+        & ^[1]-prev
+          animation $animationRollBottom
+          animation-direction reverse
+
+  &__hour
+  &__minute
+    flex(column)
+    width 45%
+    position relative
+
+
+$timeOffset = .8em
+$timeAngle = 90deg
+
+@keyframes datetime-turn
+  100%
+    transform $perspective rotateY(-180deg)
+
+@keyframes datetime-page
+  0%
+    opacity 0
+  50%
+    opacity 1
+
+@keyframes datetime-page-reverse
+  0%
+    opacity 1
+  50%
+    opacity 0
+
+@keyframes datetime-roll-top
+  100%
+    transform rotateX($timeAngle) translateY(-($timeOffset)) translateZ($timeOffset)
+    opacity 0
+
+@keyframes datetime-roll-bottom
+  0%
+    transform rotateX(-($timeAngle)) translateY($timeOffset) translateZ($timeOffset)
+    opacity 0

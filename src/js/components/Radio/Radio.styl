@@ -1,0 +1,53 @@
+.radio
+
+  input
+    display none
+
+    &:not(:checked) + ^[0]__label
+      color $colorGray1
+      opacity .5
+
+      &:after
+        opacity 0
+        transform scale(0)
+
+      &:before
+        border 2px solid $colorGray6
+
+    &:checked + ^[0]__label
+      &:after
+        opacity 1
+        transform scale(1)
+
+  &__label
+    position relative
+    display inline-block
+    padding 2px 47px 0 38px
+    letter-spacing 0.02em
+    font-weight 400
+    textSize(25px)
+    cursor pointer
+
+    +below('xs')
+      textSize(20px)
+      padding 2px 28px 0 38px
+
+    &:before
+    &:after
+      content ''
+      position absolute
+      border-radius 100%
+
+    &:before
+      top 4px
+      left 0
+      width 22px
+      height 22px
+      border 2px solid $colorMain1
+
+    &:after
+      top 9px
+      left 5px
+      width 12px
+      height 12px
+      background-color $colorMain1

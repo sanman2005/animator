@@ -1,0 +1,54 @@
+.container
+  width 100%
+  max-width $breakPointLarge
+  margin auto
+  padding 0 $columnPadding
+  opacity .9
+
+  &_fluid
+    max-width none
+
+  &--top.content
+    margin-top $columnPadding
+
+  &--fill
+    contentBox()
+
+    &.content
+      max-width 'calc(100vw - (%s * 2))' % $columnPadding
+
+  &--autosize
+    width auto
+
+.content
+  padding $columnPadding
+  border-radius $borderRadius
+
+.row
+  $margin = 'calc(%s / -2)' % $columnPadding
+  flex(row, wrap, flex-start, flex-start)
+  width 'calc(100% + %s)' % $columnPadding
+  margin-left $margin
+  margin-right $margin
+
+.column
+  $padding = 'calc(%s / 2)' % $columnPadding
+  width 100%
+  padding-left $padding
+  padding-right $padding
+
+column($prefix)
+  for $column in 1..$columns
+    .column--{$prefix}-{$column}
+      width percentage($column / $columns)
+
+column('xs')
+
++above('sm')
+  column('sm')
+
++above('md')
+  column('md')
+
++above('lg')
+  column('lg')

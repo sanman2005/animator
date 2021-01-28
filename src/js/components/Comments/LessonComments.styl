@@ -1,0 +1,203 @@
+.comment
+  position relative
+  display flex
+
+  &:not(:last-child)
+    margin-bottom 57px
+
+    +below('xs')
+      margin-bottom 40px
+
+  &--child
+    padding-left 116px
+
+    +below('xs')
+      padding-left 50px
+
+  &__photo
+    margin-right 51px
+    width 65px
+    height 65px
+    flex-shrink 0
+    imageFull(110%)
+
+    +below('xs')
+      margin-right 15px
+      width 50px
+      height 50px
+
+    svg
+      width 100%
+      height 100%
+
+  &__main
+    width 100%
+    +below('xs')
+      padding-top 8px
+
+    h3
+      textCompressed(25px)
+      color $colorWhite
+      font-weight 400
+
+      +below('xs')
+        textSize(20px)
+        letter-spacing 0.03em
+
+    .button
+      textSize(15px)
+      margin-top 30px
+      padding 0
+      height 30px
+
+      +below('xs')
+        margin-top 17px
+
+    & > .button
+      width 100px
+
+      +below('xs')
+        margin-left -65px
+
+  &__main--text
+    margin-top 10px
+    color $colorGray1
+    font-size 20px
+    line-height 30px
+
+    +below('xs')
+      margin-top 0
+      margin-left -65px
+      letter-spacing 0.03em
+      font-size 15px
+      line-height 22px
+
+  &__main--title
+    display flex
+    justify-content space-between
+    align-items center
+    height 30px
+
+    +below('xs')
+      flex-direction column
+      align-items unset
+      height auto
+
+    p
+      color $colorGray1
+      font-size 20px
+      line-height 30px
+      opacity .5
+
+      +below('xs')
+        margin-top 0
+        letter-spacing 0.01em
+        font-size 15px
+        line-height 22px
+
+  &__answers
+    margin-bottom 57px
+    padding-left 116px
+
+    +below('xs')
+      padding-left 50px
+
+  &__more
+    width 100%
+    text-align center
+    textCompressed(25px, uppercase)
+    display inline-block
+    color $colorGray1
+    font-weight 400
+    opacity .5
+    cursor pointer
+
+  &__reply
+    max-height 0
+    transition()
+    overflow hidden
+
+    &--open
+      max-height 900px
+      margin-top 60px
+
+    .comments__form-img
+      margin-right 50px
+
+    textarea
+      min-height 170px
+
+    .input
+      margin-bottom 0
+
+    .button
+      font-size 20px
+      line-height 30px
+      padding 13px 20px
+      height auto
+
+      +above('sm')
+        font-size 25px
+
+.comments
+  padding-top 80px
+  background-color $colorGray2
+
+  +below('xs')
+    padding-top 30px
+    padding-left 15px
+    padding-right 15px
+
+  &__wrapper
+    background-color $colorGray2
+
+  &__form
+    display flex
+    align-items flex-start
+    justify-content flex-start
+
+    +below('xs')
+      flex-direction column
+
+    &-img
+      margin-right 51px
+      flex-shrink 0
+      display block
+      imageFull(110%)
+
+      +below('xs')
+        margin-bottom 20px
+
+    button
+      width 192px
+
+      +below('xs')
+        width 100%
+
+    form
+      width 100%
+
+    &-img
+      width 65px
+      height 65px
+
+    textarea
+      background-color $colorGray7
+      border-radius $borderRadius
+      width 100%
+      min-height 120px
+      padding 20px 25px
+      color $colorWhite
+      outline none
+      resize none
+
+      +below('xs')
+        min-height 95px
+
+    &__none
+      textSize(30px)
+      color $colorWhite
+      margin-bottom 4px
+
+      +below('xs')
+        textSize(20px)

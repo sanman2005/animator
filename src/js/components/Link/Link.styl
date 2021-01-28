@@ -1,0 +1,43 @@
+.link
+  display block
+  color $colorMain1
+  text-decoration none
+  transition()
+  cursor pointer
+
+  svg
+    width 100%
+    max-width 50px
+    height 100%
+
+    *
+      fill $colorMain1
+      stroke $colorMain1
+      transition()
+
+  &:hover
+    theme(--color-link)
+
+  &:hover
+  &--active
+    svg *
+      fill $colorMain2
+      stroke $colorMain2
+
+  &--dark
+    theme(--color-link-dark)
+
+  &--light
+    theme(--color-button-light)
+
+  &--dark
+  &--light
+    &:hover
+      color $colorMain1
+
+      svg *
+        fill $colorMain1
+        stroke $colorMain1
+
+  &--active
+    color $colorMain2

@@ -1,0 +1,9 @@
+{
+  "api": {
+    "host": {
+      "local": "http://127.0.0.1",
+      "development": "http://127.0.0.1",
+      "production": "https://animator.hellball.ru"
+    }
+  }
+}

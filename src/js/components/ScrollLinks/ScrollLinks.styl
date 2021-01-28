@@ -1,0 +1,47 @@
+.scroll-links
+  display flex
+  flex-wrap wrap
+
+  &__link
+    textCompressed(25px, uppercase)
+    color $colorGray1
+    opacity 0.5
+    text-decoration none
+    margin-right 40px
+
+    +below('xs')
+      margin-bottom 20px
+
+    &:nth-child(3)
+      margin-left auto
+
+      +below('xs')
+        margin-left 0
+  
+  &__link--active
+    position relative
+    color $colorWhite
+    opacity 1
+
+    &::after
+      content ""
+      display block
+      position absolute
+      width 100%
+      height 2px
+      left 0
+      background-color $colorMain1
+
+.scroll-links--preview
+  color $colorGray1
+
+  & .scroll-links__link:hover
+    color $colorMain1
+    opacity 1
+  
+  & .scroll-links__link--active
+    theme(--color-dark)
+
+.scroll-links__link:hover
+  color $colorMain1
+  opacity 1

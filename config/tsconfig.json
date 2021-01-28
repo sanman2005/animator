@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "../",
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "module": "esnext",
+    "moduleResolution": "Node",
+    "noImplicitAny": true,
+    "paths": {
+      "*": ["src/js/*"],
+      "api/*": ["src/js/api/*"],
+      "components/*": ["src/js/components/*"],
+      "config/*": ["config/*"],
+      "js/*": ["src/js/*"],
+      "models/*": ["src/js/models/*"],
+      "pages/*": ["src/js/pages/*"]
+    },
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "target": "ESNext",
+    "types": ["node"]
+  },
+
+  "exclude": ["node_modules", "**/*.spec.ts"],
+
+  "include": ["../src/js/types.d.ts"],
+
+  "lib": ["webworker", "dom"]
+}

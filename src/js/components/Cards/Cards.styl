@@ -1,0 +1,37 @@
+.cards
+  position relative
+
+  .slider
+    height 100%
+    z-index 1
+
+    .slick
+      &-slider
+      &-list
+      &-track
+        overflow visible
+
+      &-slide
+        &:not(^[0]__show)
+          opacity 0
+
+        &^[0]__show
+          transition none
+          opacity 1
+
+      &-current
+        z-index 1
+        opacity 1
+
+    &__arrow
+      shadowBorder(1px, 50%, true)
+
+      &--next
+        right 'calc(%s * -4)' % $columnPadding
+
+  &__next
+  &__back
+    position absolute
+    top 0
+    right 0
+    z-index 0

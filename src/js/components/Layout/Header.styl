@@ -1,0 +1,116 @@
+.header
+  position fixed
+  top 0
+  left 0
+  width 100%
+  padding-bottom 5px
+  z-index 20
+  transition(all, .5s)
+
+  &--scroll
+    background-color $colorBackMain
+    shadowBorder(1px, 0, true)
+    opacity .9
+
+  &__content
+    flex()
+
+  &__logo
+    max-width 300px
+    shadowSimple()
+
+    +below('xs')
+      max-width 100px
+
+    img
+      max-width 100%
+      display block
+
+      +below('md')
+        max-height 40px
+
+  &__links
+    flex()
+    align-items stretch
+    transition(transform)
+    margin-right (-($columnPaddingXs))
+    padding $columnPaddingXs
+    padding-left 0
+    contentBox()
+    border-radius 0 0 ($borderRadius * 2) ($borderRadius * 2)
+    opacity .8
+
+    +below('xs')
+      border-radius 0 0 0 ($borderRadius * 2)
+
+    & > *
+      margin-left 20px
+
+  &__project-add
+    width auto
+
+    +below('xs')
+      display none
+
+  &__theme
+  &__profile
+  &__burger
+    +below('xs')
+      height 30px
+
+  &__burger
+    flex(column, nowrap, stretch, stretch)
+    padding 7px 10px
+
+    &::after
+      content ''
+      flex-grow 1
+      background-image linear-gradient(to bottom, $colorMain1 40%, transparent 60%)
+      background-size 100% 37%
+
+    &:hover::after
+      background-image linear-gradient(to bottom, $colorMain2 40%, transparent 60%)
+
+    +above('sm')
+      display none
+
+  &__menu
+    $closeSize = 40px
+    position fixed
+    left 0
+    top 0
+    width 100vw
+    height 100vh
+    padding ($columnPaddingXs * 2) $columnPadding $columnPadding
+    transform translateY(100%)
+    transition(transform)
+    background-color $colorBackMain
+
+    +above('sm')
+      display none
+
+    &-close
+      position absolute
+      top $columnPadding
+      right @top
+      width $closeSize
+      height @width
+      padding 12px
+      cross()
+
+    &-langs
+      max-width 'calc(100% - %s)' % ($closeSize + $columnPaddingXs * 2)
+      margin-bottom $columnPaddingXs * 2
+
+  .container
+    transition(opacity)
+
+  &--menu-open
+    & ^[0]__menu
+      transform translateY(0)
+
+    & ^[0]__links
+      transform translateX(100%)
+
+    .container
+      opacity .97
