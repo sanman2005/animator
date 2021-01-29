@@ -1,8 +1,6 @@
 import * as React from 'react';
 import cn from 'classnames';
 
-const DIMENSION = '%';
-
 export interface Vector {
   x: number;
   y: number;
@@ -28,10 +26,8 @@ interface IScreenProps {
 }
 
 const getElementTransform = (element: IElement) =>
-  `translate(${element.position.x}${DIMENSION}) ` +
-  `translateY(${element.position.y}${DIMENSION}) ` +
-  `scaleX(${element.scale.x}) ` +
-  `scaleY(${element.scale.y}) ` +
+  `translate(${element.position.x}%, ${element.position.y}%) ` +
+  `scale(${element.scale.x}, ${element.scale.y}) ` +
   `rotateZ(${element.rotation}) `;
 
 export const Screen: React.FC<IScreenProps> = ({
@@ -49,8 +45,8 @@ export const Screen: React.FC<IScreenProps> = ({
           key={element.id}
           style={{
             transform: getElementTransform(element),
-            width: `${element.width}${DIMENSION}`,
-            height: `${element.height}${DIMENSION}`,
+            width: `${element.width}%`,
+            height: `${element.height}%`,
             left: `calc(50% + ${element.width / 2}px)`,
             top: `calc(50% + ${element.height / 2}px)`,
           }}
