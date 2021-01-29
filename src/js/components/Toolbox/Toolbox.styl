@@ -1,0 +1,52 @@
+$offset = 20px
+$width = 100px
+$padding = 5px
+$indent = 5px
+
+.toolbox
+  position fixed
+  display flex
+  align-items stretch
+  padding $indent
+  shadowInset()
+
+  &--column
+    flex-direction column
+
+  &--left
+  &--right
+    left: $offset
+    top: 50vh
+    transform translateY(-50%)
+    height 70vh
+    width $width
+
+  &--right
+    left auto
+    right: $offset
+
+  &--top
+  &--bottom
+    top: $offset
+    left: 50%
+    transform translateX(-50%)
+    width 70vw
+    height $width
+
+  &--bottom
+    top auto
+    bottom: $offset
+
+  &__item
+    display flex
+    justify-content center
+    align-items center
+    width $width - $indent * 4
+    height @width
+    margin $indent
+    user-select none
+    cursor pointer
+    shadow()
+
+    &:hover
+      shadowBorder()
