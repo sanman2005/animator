@@ -1,35 +1,82 @@
 import * as React from 'react';
+import { v4 as uuidv } from 'uuid';
 
+import { Element } from 'components/Element';
 import { Content } from 'components/Grid';
-import { Screen } from 'components/Screen';
+import { IScreenElement, Screen } from 'components/Screen';
 import { Toolbox } from 'components/Toolbox';
 
-export default () => (
-  <Content className='home' centerContent>
-    <Screen elements={[]} />
+interface IState {
+  activeScreenElement: string;
+  sceneElements: IScreenElement[];
+}
 
-    <Toolbox
-      position='left'
-      items={[
-        { id: 1, content: 123 },
-        { id: 2, content: 321 },
-      ]}
-    />
+const elements: { [key: string]: string } = {
+  '1': '/img/logo.png',
+  '2': '/img/logo.png',
+};
 
-    <Toolbox
-      position='right'
-      items={[
-        { id: 1, content: 123 },
-        { id: 2, content: 321 },
-      ]}
-    />
+const elementsKeys = Object.keys(elements);
 
-    <Toolbox
-      position='bottom'
-      items={[
-        { id: 1, content: 123 },
-        { id: 2, content: 321 },
-      ]}
-    />
-  </Content>
-);
+class Home extends React.Component<{}, IState> {
+  state: IState = {
+    activeScreenElement: null,
+    sceneElements: [],
+  };
+
+  onToolboxItemClick = (id: string) => {
+    const screenElement: IScreenElement = {
+      id: uuidv(),
+      idToolbox: id,
+      height: 100,
+      width: 100,
+      position: { x: 0, y: 0 },
+      scale: { x: 1, y: 1 },
+      rotation: 0,
+      content: (
+        <Element
+          image={elements[id]}
+          onClick={() => this.onScreenElementClick(id)}
+        />
+      ),
+    };
+
+    this.addScreenElement(screenElement);
+  };
+
+  onScreenElementClick = (id: string) =>
+    this.setState({ activeScreenElement: id });
+
+  addScreenElement = (element: IScreenElement) =>
+    this.setState(({ sceneElements }) => ({
+      sceneElements: [...sceneElements, element],
+    }));
+
+  render() {
+    const { sceneElements } = this.state;
+    const defaultElements = elementsKeys.map(id => ({
+      id,
+      content: (
+        <Element
+          key={id}
+          image={elements[id]}
+          onClick={() => this.onToolboxItemClick(id)}
+        />
+      ),
+    }));
+
+    return (
+      <Content className='home' centerContent>
+        <Screen elements={sceneElements} />
+
+        <Toolbox position='left' items={defaultElements} />
+
+        <Toolbox position='right' items={sceneElements} />
+
+        <Toolbox position='bottom' items={sceneElements} />
+      </Content>
+    );
+  }
+}
+
+export default Home;

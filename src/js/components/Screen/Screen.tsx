@@ -6,14 +6,15 @@ export interface Vector {
   y: number;
 }
 
-export interface IElement {
+interface IElement {
   position: Vector;
   rotation: number;
   scale: Vector;
 }
 
 export interface IScreenElement extends IElement {
-  id: string | number;
+  id: string;
+  idToolbox: string;
   content: React.ReactNode;
   height: number;
   width: number;

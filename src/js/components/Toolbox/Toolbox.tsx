@@ -2,7 +2,7 @@ import * as React from 'react';
 import cn from 'classnames';
 
 export interface IToolboxItem {
-  id: string | number;
+  id: string;
   content: React.ReactNode;
 }
 
