@@ -12,8 +12,8 @@ interface IState {
 }
 
 const elements: { [key: string]: string } = {
-  '1': '/img/logo.png',
-  '2': '/img/logo.png',
+  1: '/img/logo.png',
+  2: '/img/logo.png',
 };
 
 const elementsKeys = Object.keys(elements);
@@ -24,12 +24,23 @@ class Home extends React.Component<{}, IState> {
     sceneElements: [],
   };
 
+  elementsTemplates = elementsKeys.map(id => ({
+    id,
+    content: (
+      <Element
+        key={id}
+        image={elements[id]}
+        onClick={() => this.onToolboxItemClick(id)}
+      />
+    ),
+  }));
+
   onToolboxItemClick = (id: string) => {
     const screenElement: IScreenElement = {
       id: uuidv(),
       idToolbox: id,
-      height: 100,
-      width: 100,
+      height: 10,
+      width: 10,
       position: { x: 0, y: 0 },
       scale: { x: 1, y: 1 },
       rotation: 0,
@@ -37,6 +48,7 @@ class Home extends React.Component<{}, IState> {
         <Element
           image={elements[id]}
           onClick={() => this.onScreenElementClick(id)}
+          onClickRight={() => this.onScreenElementRightClick(screenElement)}
         />
       ),
     };
@@ -47,6 +59,17 @@ class Home extends React.Component<{}, IState> {
   onScreenElementClick = (id: string) =>
     this.setState({ activeScreenElement: id });
 
+  onScreenElementRightClick = (element: IScreenElement) => {
+    const { sceneElements } = this.state;
+    const index = sceneElements.indexOf(element);
+
+    this.setState({
+      sceneElements: sceneElements
+        .slice(0, index)
+        .concat(sceneElements.slice(index + 1)),
+    });
+  };
+
   addScreenElement = (element: IScreenElement) =>
     this.setState(({ sceneElements }) => ({
       sceneElements: [...sceneElements, element],
@@ -54,22 +77,12 @@ class Home extends React.Component<{}, IState> {
 
   render() {
     const { sceneElements } = this.state;
-    const defaultElements = elementsKeys.map(id => ({
-      id,
-      content: (
-        <Element
-          key={id}
-          image={elements[id]}
-          onClick={() => this.onToolboxItemClick(id)}
-        />
-      ),
-    }));
 
     return (
       <Content className='home' centerContent>
         <Screen elements={sceneElements} />
 
-        <Toolbox position='left' items={defaultElements} />
+        <Toolbox position='left' items={this.elementsTemplates} />
 
         <Toolbox position='right' items={sceneElements} />
 

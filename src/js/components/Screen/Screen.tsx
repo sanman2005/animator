@@ -43,13 +43,14 @@ export const Screen: React.FC<IScreenProps> = ({
     >
       {elements.map(element => (
         <div
+          className='screenElement'
           key={element.id}
           style={{
             transform: getElementTransform(element),
             width: `${element.width}%`,
             height: `${element.height}%`,
-            left: `calc(50% + ${element.width / 2}px)`,
-            top: `calc(50% + ${element.height / 2}px)`,
+            left: `calc(50% - ${element.width / 2}%)`,
+            top: `calc(50% - ${element.height / 2}%)`,
           }}
         >
           {element.content}
