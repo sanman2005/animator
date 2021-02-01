@@ -92,6 +92,20 @@ contentBox($inverse = false)
   background-color $colorBackMain
   shadowBorder(1px, $borderRadius, $inverse)
 
+highlight($color = $colorRed2, $radius = $borderRadius, $thickness = 1px, $lightSize = 2px, $offset = 1px)
+  $lightColor = rgba($color, 0.5)
+
+  &::after
+    content ''
+    position absolute
+    top: $offset
+    left: @top
+    right: $offset + 1
+    bottom: @right
+    border-radius $radius
+    border $thickness solid rgba($color, 0.7)
+    box-shadow $lightSize $lightSize ($lightSize * 2) $lightColor, inset $lightSize $lightSize ($lightSize * 2) $lightColor
+
 transition($property = all, $duration = $transition, $function = ease)
   transition $property $duration $function
 

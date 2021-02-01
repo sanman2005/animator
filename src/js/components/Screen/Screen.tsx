@@ -21,19 +21,23 @@ export interface IScreenElement extends IElement {
 }
 
 interface IScreenProps {
+  activeElementId?: string;
   className?: string;
   elements: IScreenElement[];
+  onChangeElement?: (element: IScreenElement) => void;
   screen?: IElement;
 }
 
 const getElementTransform = (element: IElement) =>
   `translate(${element.position.x}%, ${element.position.y}%) ` +
   `scale(${element.scale.x}, ${element.scale.y}) ` +
-  `rotateZ(${element.rotation}) `;
+  `rotateZ(${element.rotation}deg) `;
 
 export const Screen: React.FC<IScreenProps> = ({
+  activeElementId,
   className,
   elements,
+  onChangeElement,
   screen,
 }) => (
   <div className={cn(className, 'screenWrapper')}>
@@ -43,8 +47,16 @@ export const Screen: React.FC<IScreenProps> = ({
     >
       {elements.map(element => (
         <div
-          className='screenElement'
+          className={cn('screenElement', {
+            'screenElement--active': activeElementId === element.id,
+          })}
           key={element.id}
+          onWheel={event => {
+            const angle = 5 * (event.deltaY < 0 ? 1 : -1);
+            const rotation = (element.rotation + angle) % 360;
+
+            onChangeElement({ ...element, rotation });
+          }}
           style={{
             transform: getElementTransform(element),
             width: `${element.width}%`,

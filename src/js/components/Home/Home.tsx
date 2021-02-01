@@ -7,7 +7,7 @@ import { IScreenElement, Screen } from 'components/Screen';
 import { Toolbox } from 'components/Toolbox';
 
 interface IState {
-  activeScreenElement: string;
+  activeSceneElementId: string;
   sceneElements: IScreenElement[];
 }
 
@@ -20,7 +20,7 @@ const elementsKeys = Object.keys(elements);
 
 class Home extends React.Component<{}, IState> {
   state: IState = {
-    activeScreenElement: null,
+    activeSceneElementId: null,
     sceneElements: [],
   };
 
@@ -47,7 +47,7 @@ class Home extends React.Component<{}, IState> {
       content: (
         <Element
           image={elements[id]}
-          onClick={() => this.onScreenElementClick(id)}
+          onClick={() => this.onScreenElementClick(screenElement)}
           onClickRight={() => this.onScreenElementRightClick(screenElement)}
         />
       ),
@@ -56,8 +56,8 @@ class Home extends React.Component<{}, IState> {
     this.addScreenElement(screenElement);
   };
 
-  onScreenElementClick = (id: string) =>
-    this.setState({ activeScreenElement: id });
+  onScreenElementClick = (element: IScreenElement) =>
+    this.setState({ activeSceneElementId: element.id });
 
   onScreenElementRightClick = (element: IScreenElement) => {
     const { sceneElements } = this.state;
@@ -75,18 +75,38 @@ class Home extends React.Component<{}, IState> {
       sceneElements: [...sceneElements, element],
     }));
 
-  render() {
+  updateScreenElement = (element: IScreenElement) => {
     const { sceneElements } = this.state;
+    const index = sceneElements.findIndex(item => element.id === item.id);
+    const newSceneElements = [...sceneElements];
+
+    newSceneElements[index] = element;
+    this.setState({
+      activeSceneElementId: element.id,
+      sceneElements: newSceneElements,
+    });
+  };
+
+  render() {
+    const { activeSceneElementId, sceneElements } = this.state;
 
     return (
       <Content className='home' centerContent>
-        <Screen elements={sceneElements} />
+        <Screen
+          activeElementId={activeSceneElementId}
+          elements={sceneElements}
+          onChangeElement={this.updateScreenElement}
+        />
 
-        <Toolbox position='left' items={this.elementsTemplates} />
+        <Toolbox items={this.elementsTemplates} position='left' />
 
-        <Toolbox position='right' items={sceneElements} />
+        <Toolbox
+          activeItemId={activeSceneElementId}
+          items={sceneElements}
+          position='right'
+        />
 
-        <Toolbox position='bottom' items={sceneElements} />
+        <Toolbox items={sceneElements} position='bottom' />
       </Content>
     );
   }

@@ -38,6 +38,7 @@ $indent = 5px
     bottom: $offset
 
   &__item
+    position relative
     display flex
     justify-content center
     align-items center
@@ -50,3 +51,7 @@ $indent = 5px
 
     &:hover
       shadowBorder()
+
+    &--active
+      highlight()
+
