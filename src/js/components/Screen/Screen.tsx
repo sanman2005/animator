@@ -33,41 +33,97 @@ const getElementTransform = (element: IElement) =>
   `scale(${element.scale.x}, ${element.scale.y}) ` +
   `rotateZ(${element.rotation}deg) `;
 
+const getPosition = (event: React.MouseEvent<HTMLDivElement>) => ({
+  x: event.pageX,
+  y: event.pageY,
+});
+
 export const Screen: React.FC<IScreenProps> = ({
   activeElementId,
   className,
   elements,
   onChangeElement,
   screen,
-}) => (
-  <div className={cn(className, 'screenWrapper')}>
-    <div
-      className='screen'
-      style={{ transform: screen && getElementTransform(screen) }}
-    >
-      {elements.map(element => (
-        <div
-          className={cn('screenElement', {
-            'screenElement--active': activeElementId === element.id,
-          })}
-          key={element.id}
-          onWheel={event => {
-            const angle = 5 * (event.deltaY < 0 ? 1 : -1);
-            const rotation = (element.rotation + angle) % 360;
+}) => {
+  const [draggingElement, setDraggingElement] = React.useState<IScreenElement>(
+    null,
+  );
+  const [lastDragPosition, setDragPosition] = React.useState<Vector>(null);
+  const [draggingElementSize, setDraggingElementSize] = React.useState<Vector>(
+    null,
+  );
 
-            onChangeElement({ ...element, rotation });
-          }}
-          style={{
-            transform: getElementTransform(element),
-            width: `${element.width}%`,
-            height: `${element.height}%`,
-            left: `calc(50% - ${element.width / 2}%)`,
-            top: `calc(50% - ${element.height / 2}%)`,
-          }}
-        >
-          {element.content}
-        </div>
-      ))}
+  const startDrag = React.useCallback(
+    (event: React.MouseEvent<HTMLDivElement>, element: IScreenElement) => {
+      const { offsetHeight, offsetWidth } = event.currentTarget;
+
+      setDraggingElement(element);
+      setDraggingElementSize({ x: offsetWidth, y: offsetHeight });
+      setDragPosition(getPosition(event));
+    },
+    [],
+  );
+
+  const onMouseMove = React.useCallback(
+    event => {
+      if (!draggingElement) return;
+
+      const newDragPosition = getPosition(event);
+      const position = { ...draggingElement.position };
+
+      position.x +=
+        (100 * (newDragPosition.x - lastDragPosition.x)) /
+        draggingElementSize.x;
+
+      position.y +=
+        (100 * (newDragPosition.y - lastDragPosition.y)) /
+        draggingElementSize.y;
+
+      setDragPosition(newDragPosition);
+
+      onChangeElement({
+        ...draggingElement,
+        position,
+      });
+    },
+    [draggingElement, onChangeElement],
+  );
+
+  const stopDrag = React.useCallback(() => setDraggingElement(null), []);
+
+  return (
+    <div className={cn(className, 'screenWrapper')}>
+      <div
+        className='screen'
+        onMouseMoveCapture={onMouseMove}
+        onMouseUpCapture={stopDrag}
+        style={{ transform: screen && getElementTransform(screen) }}
+      >
+        {elements.map(element => (
+          <div
+            className={cn('screenElement', {
+              'screenElement--active': activeElementId === element.id,
+            })}
+            key={element.id}
+            onMouseDownCapture={event => startDrag(event, element)}
+            onWheel={event => {
+              const angle = 5 * (event.deltaY < 0 ? 1 : -1);
+              const rotation = (element.rotation + angle) % 360;
+
+              onChangeElement({ ...element, rotation });
+            }}
+            style={{
+              transform: getElementTransform(element),
+              width: `${element.width}%`,
+              height: `${element.height}%`,
+              left: `calc(50% - ${element.width / 2}%)`,
+              top: `calc(50% - ${element.height / 2}%)`,
+            }}
+          >
+            {element.content}
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};

@@ -6,8 +6,6 @@ import cn from 'classnames';
 import { Container } from '../Grid';
 import Button from '../Button';
 import Icons from '../icons';
-import Link from '../Link';
-import Navigation from '../Navigation';
 import Switcher from '../Switcher';
 
 import { isClient } from 'js/helpers';
@@ -83,10 +81,6 @@ class Header extends React.Component<RouteComponentProps, THeaderState> {
       >
         <Container>
           <div className='header__content'>
-            <Link to='/' className='header__logo'>
-              <img src='/img/logo.png' alt='Tetris' />
-            </Link>
-
             <div className='header__links'>
               <Button
                 className='header__lang'
