@@ -11,12 +11,12 @@ interface IState {
   sceneElements: IScreenElement[];
 }
 
-const elements: { [key: string]: string } = {
+const templates: { [key: string]: string } = {
   1: '/img/logo.png',
   2: '/img/logo.png',
 };
 
-const elementsKeys = Object.keys(elements);
+const templatesKeys = Object.keys(templates);
 
 class Home extends React.Component<{}, IState> {
   state: IState = {
@@ -24,21 +24,21 @@ class Home extends React.Component<{}, IState> {
     sceneElements: [],
   };
 
-  elementsTemplates = elementsKeys.map(id => ({
+  elementsTemplates = templatesKeys.map(id => ({
     id,
     content: (
       <Element
-        key={id}
-        image={elements[id]}
+        image={templates[id]}
         onClick={() => this.onToolboxItemClick(id)}
       />
     ),
   }));
 
-  onToolboxItemClick = (id: string) => {
+  onToolboxItemClick = (templateId: string) => {
+    const id = uuidv();
     const screenElement: IScreenElement = {
-      id: uuidv(),
-      idToolbox: id,
+      id,
+      idTemplate: templateId,
       height: 10,
       width: 10,
       position: { x: 0, y: 0 },
@@ -46,9 +46,9 @@ class Home extends React.Component<{}, IState> {
       rotation: 0,
       content: (
         <Element
-          image={elements[id]}
-          onClick={() => this.onScreenElementClick(screenElement)}
-          onClickRight={() => this.onScreenElementRightClick(screenElement)}
+          image={templates[templateId]}
+          onClick={() => this.onScreenElementClick(id)}
+          onClickRight={() => this.onScreenElementRightClick(id)}
         />
       ),
     };
@@ -56,12 +56,12 @@ class Home extends React.Component<{}, IState> {
     this.addScreenElement(screenElement);
   };
 
-  onScreenElementClick = (element: IScreenElement) =>
-    this.setState({ activeSceneElementId: element.id });
+  onScreenElementClick = (id: string) =>
+    this.setState({ activeSceneElementId: id });
 
-  onScreenElementRightClick = (element: IScreenElement) => {
+  onScreenElementRightClick = (id: string) => {
     const { sceneElements } = this.state;
-    const index = sceneElements.indexOf(element);
+    const index = sceneElements.findIndex(item => item.id === id);
 
     this.setState({
       sceneElements: sceneElements
@@ -81,11 +81,14 @@ class Home extends React.Component<{}, IState> {
     const newSceneElements = [...sceneElements];
 
     newSceneElements[index] = element;
+
     this.setState({
       activeSceneElementId: element.id,
       sceneElements: newSceneElements,
     });
   };
+
+  deactivateScreenElement = () => this.setState({ activeSceneElementId: null });
 
   render() {
     const { activeSceneElementId, sceneElements } = this.state;
@@ -96,6 +99,7 @@ class Home extends React.Component<{}, IState> {
           activeElementId={activeSceneElementId}
           elements={sceneElements}
           onChangeElement={this.updateScreenElement}
+          onScreenClick={this.deactivateScreenElement}
         />
 
         <Toolbox items={this.elementsTemplates} position='left' />

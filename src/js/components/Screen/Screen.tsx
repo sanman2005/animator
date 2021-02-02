@@ -14,7 +14,7 @@ interface IElement {
 
 export interface IScreenElement extends IElement {
   id: string;
-  idToolbox: string;
+  idTemplate: string;
   content: React.ReactNode;
   height: number;
   width: number;
@@ -25,6 +25,7 @@ interface IScreenProps {
   className?: string;
   elements: IScreenElement[];
   onChangeElement?: (element: IScreenElement) => void;
+  onScreenClick?: () => void;
   screen?: IElement;
 }
 
@@ -43,6 +44,7 @@ export const Screen: React.FC<IScreenProps> = ({
   className,
   elements,
   onChangeElement,
+  onScreenClick,
   screen,
 }) => {
   const [draggingElement, setDraggingElement] = React.useState<IScreenElement>(
@@ -92,7 +94,10 @@ export const Screen: React.FC<IScreenProps> = ({
   const stopDrag = React.useCallback(() => setDraggingElement(null), []);
 
   return (
-    <div className={cn(className, 'screenWrapper')}>
+    <div
+      className={cn(className, 'screenWrapper')}
+      onMouseUpCapture={() => !draggingElement && onScreenClick()}
+    >
       <div
         className='screen'
         onMouseMoveCapture={onMouseMove}

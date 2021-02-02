@@ -13,7 +13,7 @@ export const Element: React.FC<IElementProps> = ({
 }) => (
   <div
     className='element'
-    onMouseDown={onClick}
+    onClick={onClick}
     onContextMenu={(event: React.MouseEvent) => {
       event.preventDefault();
       onClickRight && onClickRight();
