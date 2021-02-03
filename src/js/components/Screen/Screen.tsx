@@ -31,8 +31,8 @@ interface IScreenProps {
 
 const getElementTransform = (element: IElement) =>
   `translate(${element.position.x}%, ${element.position.y}%) ` +
-  `scale(${element.scale.x}, ${element.scale.y}) ` +
-  `rotateZ(${element.rotation}deg) `;
+  `rotateZ(${element.rotation}deg) ` +
+  `scale(${element.scale.x}, ${element.scale.y}) `;
 
 const getPosition = (event: React.MouseEvent<HTMLDivElement>) => ({
   x: event.pageX,
@@ -50,53 +50,91 @@ export const Screen: React.FC<IScreenProps> = ({
   const [draggingElement, setDraggingElement] = React.useState<IScreenElement>(
     null,
   );
-  const [lastDragPosition, setDragPosition] = React.useState<Vector>(null);
-  const [draggingElementSize, setDraggingElementSize] = React.useState<Vector>(
+  const [resizingElement, setResizingElement] = React.useState<IScreenElement>(
+    null,
+  );
+  const [lastPosition, setPosition] = React.useState<Vector>(null);
+  const [editingElementSize, setEditingElementSize] = React.useState<Vector>(
     null,
   );
 
-  const startDrag = React.useCallback(
+  const rotateElement = React.useCallback(
+    (event: React.WheelEvent, element: IScreenElement) => {
+      const angle = 5 * (event.deltaY < 0 ? 1 : -1);
+      const rotation = (element.rotation + angle) % 360;
+
+      onChangeElement({ ...element, rotation });
+    },
+    [],
+  );
+
+  const startEdit = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement>, element: IScreenElement) => {
       const { offsetHeight, offsetWidth } = event.currentTarget;
 
-      setDraggingElement(element);
-      setDraggingElementSize({ x: offsetWidth, y: offsetHeight });
-      setDragPosition(getPosition(event));
+      if (event.button) {
+        event.stopPropagation();
+        event.preventDefault();
+        setResizingElement(element);
+      } else {
+        setDraggingElement(element);
+      }
+
+      setEditingElementSize({ x: offsetWidth, y: offsetHeight });
+      setPosition(getPosition(event));
     },
     [],
   );
 
   const onMouseMove = React.useCallback(
     event => {
-      if (!draggingElement) return;
+      const currentPosition = getPosition(event);
 
-      const newDragPosition = getPosition(event);
-      const position = { ...draggingElement.position };
+      if (draggingElement) {
+        const position = { ...draggingElement.position };
 
-      position.x +=
-        (100 * (newDragPosition.x - lastDragPosition.x)) /
-        draggingElementSize.x;
+        position.x +=
+          (100 * (currentPosition.x - lastPosition.x)) / editingElementSize.x;
 
-      position.y +=
-        (100 * (newDragPosition.y - lastDragPosition.y)) /
-        draggingElementSize.y;
+        position.y +=
+          (100 * (currentPosition.y - lastPosition.y)) / editingElementSize.y;
 
-      setDragPosition(newDragPosition);
+        setPosition(currentPosition);
 
-      onChangeElement({
-        ...draggingElement,
-        position,
-      });
+        onChangeElement({
+          ...draggingElement,
+          position,
+        });
+      } else if (resizingElement) {
+        const scale = { ...resizingElement.scale };
+
+        scale.x +=
+          (2 * (currentPosition.x - lastPosition.x)) / editingElementSize.x;
+        scale.y +=
+          (2 * (currentPosition.y - lastPosition.y)) / editingElementSize.y;
+
+        setPosition(currentPosition);
+
+        onChangeElement({
+          ...resizingElement,
+          scale,
+        });
+      }
     },
-    [draggingElement, onChangeElement],
+    [draggingElement, onChangeElement, resizingElement],
   );
 
-  const stopDrag = React.useCallback(() => setDraggingElement(null), []);
+  const stopDrag = React.useCallback(() => {
+    setDraggingElement(null);
+    setResizingElement(null);
+  }, []);
 
   return (
     <div
       className={cn(className, 'screenWrapper')}
-      onMouseUpCapture={() => !draggingElement && onScreenClick()}
+      onMouseUpCapture={() =>
+        !draggingElement && !resizingElement && onScreenClick()
+      }
     >
       <div
         className='screen'
@@ -110,13 +148,9 @@ export const Screen: React.FC<IScreenProps> = ({
               'screenElement--active': activeElementId === element.id,
             })}
             key={element.id}
-            onMouseDownCapture={event => startDrag(event, element)}
-            onWheel={event => {
-              const angle = 5 * (event.deltaY < 0 ? 1 : -1);
-              const rotation = (element.rotation + angle) % 360;
-
-              onChangeElement({ ...element, rotation });
-            }}
+            onContextMenuCapture={event => startEdit(event, element)}
+            onMouseDownCapture={event => startEdit(event, element)}
+            onWheel={event => rotateElement(event, element)}
             style={{
               transform: getElementTransform(element),
               width: `${element.width}%`,
