@@ -107,11 +107,15 @@ export const Screen: React.FC<IScreenProps> = ({
         });
       } else if (resizingElement) {
         const scale = { ...resizingElement.scale };
+        const isShift = event.shiftKey;
+        const diff = {
+          x: currentPosition.x - lastPosition.x,
+          y: currentPosition.y - lastPosition.y,
+        };
+        const maxDiff = Math.max(diff.x, diff.y);
 
-        scale.x +=
-          (2 * (currentPosition.x - lastPosition.x)) / editingElementSize.x;
-        scale.y +=
-          (2 * (currentPosition.y - lastPosition.y)) / editingElementSize.y;
+        scale.x += (2 * isShift ? maxDiff : diff.x) / editingElementSize.x;
+        scale.y += (2 * isShift ? maxDiff : diff.y) / editingElementSize.y;
 
         setPosition(currentPosition);
 
