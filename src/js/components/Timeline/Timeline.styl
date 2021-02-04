@@ -1,0 +1,36 @@
+$smallRadius = $borderRadius / 4
+
+.timelineWrapper
+  display flex
+  width 100%
+  margin 1px 0 0 1px
+  shadow($size: 3px)
+
+.timeline
+  display flex
+  width 100%
+  margin 35px 10px 10px
+  shadowInset(2px)
+
+  &__frame
+    position relative
+    width 100%
+    cursor pointer
+    border-radius $smallRadius
+    highlight($color: $colorGray1, $radius: $smallRadius)
+
+    &:hover
+      highlightFill($color: $colorGray1, $radius: $smallRadius)
+
+    &--highlighted
+      &, &:hover
+        highlightFill($color: $colorYellow, $radius: $smallRadius)
+
+    &--active
+      &, &:hover
+        highlight($radius: $smallRadius)
+
+.timelineWrapper
+.timeline
+  &, &::before
+    border-radius 'calc(%s / 2)' % $borderRadius

@@ -4,10 +4,18 @@ import { v4 as uuidv } from 'uuid';
 import { Element } from 'components/Element';
 import { Content } from 'components/Grid';
 import { IScreenElement, Screen } from 'components/Screen';
+import { TFrame, Timeline } from 'components/Timeline';
 import { Toolbox } from 'components/Toolbox';
+
+const ANIMATION_SECONDS = 5;
+const ANIMATION_FRAME_SECONDS = 0.2;
+
+const animationFramesCount = ANIMATION_SECONDS / ANIMATION_FRAME_SECONDS;
 
 interface IState {
   activeSceneElementId: string;
+  activeFrameIndex: number;
+  frames: TFrame[];
   sceneElements: IScreenElement[];
 }
 
@@ -18,9 +26,11 @@ const templates: { [key: string]: string } = {
 
 const templatesKeys = Object.keys(templates);
 
-class Home extends React.Component<{}, IState> {
+class Editor extends React.Component<{}, IState> {
   state: IState = {
     activeSceneElementId: null,
+    activeFrameIndex: 0,
+    frames: Array.from(Array(animationFramesCount)).map(() => ({})),
     sceneElements: [],
   };
 
@@ -59,45 +69,69 @@ class Home extends React.Component<{}, IState> {
   onScreenElementClick = (id: string) =>
     this.setState({ activeSceneElementId: id });
 
-  onScreenElementRightClick = (id: string) => {
-    const { sceneElements } = this.state;
+  onScreenElementRightClick = (id: string) => this.removeElementFromScene(id);
+
+  removeElementFromScene = (id: string) => {
+    const { frames, sceneElements } = this.state;
     const index = sceneElements.findIndex(item => item.id === id);
+    const newSceneElements = sceneElements
+      .slice(0, index)
+      .concat(sceneElements.slice(index + 1));
+    const newFrames = [...frames];
+
+    newFrames.forEach(frame => delete frame[id]);
 
     this.setState({
-      sceneElements: sceneElements
-        .slice(0, index)
-        .concat(sceneElements.slice(index + 1)),
+      frames: newFrames,
+      sceneElements: newSceneElements,
     });
   };
 
-  addScreenElement = (element: IScreenElement) =>
-    this.setState(({ sceneElements }) => ({
-      sceneElements: [...sceneElements, element],
-    }));
+  addScreenElement = (element: IScreenElement) => {
+    const { activeFrameIndex, frames, sceneElements } = this.state;
+    const newFrames = [...frames];
 
-  updateScreenElement = (element: IScreenElement) => {
-    const { sceneElements } = this.state;
-    const index = sceneElements.findIndex(item => element.id === item.id);
-    const newSceneElements = [...sceneElements];
-
-    newSceneElements[index] = element;
+    newFrames[activeFrameIndex][element.id] = element;
 
     this.setState({
-      activeSceneElementId: element.id,
+      frames: newFrames,
+      sceneElements: [...sceneElements, element],
+    });
+  };
+
+  updateScreenElement = (element: IScreenElement) => {
+    const { activeFrameIndex, frames, sceneElements } = this.state;
+    const { id } = element;
+    const index = sceneElements.findIndex(item => item.id === id);
+    const newSceneElements = [...sceneElements];
+    const newFrames = [...frames];
+
+    newSceneElements[index] = element;
+    newFrames[activeFrameIndex][id] = element;
+
+    this.setState({
+      activeSceneElementId: id,
       sceneElements: newSceneElements,
     });
   };
 
   deactivateScreenElement = () => this.setState({ activeSceneElementId: null });
 
+  onFrameClick = (index: number) => this.setState({ activeFrameIndex: index });
+
   render() {
-    const { activeSceneElementId, sceneElements } = this.state;
+    const {
+      activeSceneElementId,
+      activeFrameIndex,
+      frames,
+      sceneElements,
+    } = this.state;
 
     return (
       <Content className='home' centerContent>
         <Screen
           activeElementId={activeSceneElementId}
-          elements={sceneElements}
+          elements={Object.values(frames[activeFrameIndex])}
           onChangeElement={this.updateScreenElement}
           onScreenClick={this.deactivateScreenElement}
         />
@@ -110,10 +144,17 @@ class Home extends React.Component<{}, IState> {
           position='right'
         />
 
-        <Toolbox items={sceneElements} position='bottom' />
+        <Toolbox position='bottom'>
+          <Timeline
+            activeElementId={activeSceneElementId}
+            activeFrameIndex={activeFrameIndex}
+            frames={frames}
+            onFrameClick={this.onFrameClick}
+          />
+        </Toolbox>
       </Content>
     );
   }
 }
 
-export default Home;
+export default Editor;

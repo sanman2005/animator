@@ -6,7 +6,7 @@ export interface Vector {
   y: number;
 }
 
-interface IElement {
+export interface IElement {
   position: Vector;
   rotation: number;
   scale: Vector;

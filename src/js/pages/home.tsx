@@ -1,5 +1,5 @@
 import * as React from 'react';
 
-import Home from 'components/Home';
+import Editor from 'components/Editor';
 
-export default () => <Home />;
+export default () => <Editor />;

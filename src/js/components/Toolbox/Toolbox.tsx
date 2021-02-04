@@ -8,31 +8,35 @@ export interface IToolboxItem {
 
 interface IToolboxProps {
   activeItemId?: string;
+  children?: React.ReactNode;
   className?: string;
-  items: IToolboxItem[];
+  items?: IToolboxItem[];
   position: 'left' | 'right' | 'top' | 'bottom';
 }
 
 export const Toolbox: React.FC<IToolboxProps> = ({
   activeItemId,
+  children,
   className,
   items,
   position,
 }) => (
-  <ul
+  <div
     className={cn(className, 'toolbox', `toolbox--${position}`, {
       'toolbox--column': ['left', 'right'].includes(position),
     })}
   >
-    {items.map(item => (
-      <li
+    {items?.map(item => (
+      <div
         className={cn('toolbox__item', {
           'toolbox__item--active': activeItemId === item.id,
         })}
         key={item.id}
       >
         {item.content}
-      </li>
+      </div>
     ))}
-  </ul>
+
+    {children}
+  </div>
 );
