@@ -11,6 +11,7 @@ interface ITimelineProps {
   className?: string;
   frames: TFrame[];
   onFrameClick?: (index: number) => void;
+  onFrameRightClick?: (index: number) => void;
 }
 
 export class Timeline extends React.PureComponent<ITimelineProps> {
@@ -23,6 +24,7 @@ export class Timeline extends React.PureComponent<ITimelineProps> {
       className,
       frames,
       onFrameClick,
+      onFrameRightClick,
     } = this.props;
 
     return (
@@ -37,6 +39,10 @@ export class Timeline extends React.PureComponent<ITimelineProps> {
                   : Object.values(frame).length,
               })}
               onClick={() => onFrameClick(index)}
+              onContextMenu={(event) => {
+                event.preventDefault();
+                onFrameRightClick(index);
+              }}
             />
           ))}
         </div>

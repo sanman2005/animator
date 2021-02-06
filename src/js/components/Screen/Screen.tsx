@@ -139,6 +139,7 @@ export const Screen: React.FC<IScreenProps> = ({
       onMouseUpCapture={() =>
         !draggingElement && !resizingElement && onScreenClick()
       }
+      onContextMenuCapture={event => event.preventDefault()}
     >
       <div
         className='screen'

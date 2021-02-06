@@ -79,7 +79,10 @@ class Editor extends React.Component<{}, IState> {
       .concat(sceneElements.slice(index + 1));
     const newFrames = [...frames];
 
-    newFrames.forEach(frame => delete frame[id]);
+    newFrames.forEach((frame, index) => {
+      newFrames[index] = { ...frames[index] };
+      delete newFrames[index][id];
+    });
 
     this.setState({
       frames: newFrames,
@@ -88,13 +91,10 @@ class Editor extends React.Component<{}, IState> {
   };
 
   addScreenElement = (element: IScreenElement) => {
-    const { activeFrameIndex, frames, sceneElements } = this.state;
-    const newFrames = [...frames];
+    const { activeFrameIndex, sceneElements } = this.state;
 
-    newFrames[activeFrameIndex][element.id] = element;
-
+    this.addElementToFrame(element, activeFrameIndex);
     this.setState({
-      frames: newFrames,
       sceneElements: [...sceneElements, element],
     });
   };
@@ -118,6 +118,52 @@ class Editor extends React.Component<{}, IState> {
   deactivateScreenElement = () => this.setState({ activeSceneElementId: null });
 
   onFrameClick = (index: number) => this.setState({ activeFrameIndex: index });
+
+  onFrameRightClick = (index: number) => {
+    const {
+      activeSceneElementId,
+      activeFrameIndex,
+      frames,
+      sceneElements,
+    } = this.state;
+
+    if (activeSceneElementId) {
+      const frameHasActiveElement = !!frames[activeFrameIndex][
+        activeSceneElementId
+      ];
+
+      if (frameHasActiveElement) {
+        this.removeElementFromFrame(activeSceneElementId, activeFrameIndex);
+      } else {
+        const activeElement = sceneElements.find(
+          element => element.id === activeSceneElementId,
+        );
+
+        this.addElementToFrame(activeElement, activeFrameIndex);
+      }
+    }
+
+    this.setState({ activeFrameIndex: index });
+  };
+
+  addElementToFrame = (element: IScreenElement, frameIndex: number) => {
+    const newFrames = [...this.state.frames];
+
+    newFrames[frameIndex][element.id] = element;
+
+    this.setState({ frames: newFrames });
+  };
+
+  removeElementFromFrame = (id: string, frameIndex: number) => {
+    const { frames } = this.state;
+    const newFrames = [...frames];
+
+    newFrames[frameIndex] = { ...frames[frameIndex] };
+
+    delete newFrames[frameIndex][id];
+
+    this.setState({ frames: newFrames });
+  };
 
   render() {
     const {
@@ -150,6 +196,7 @@ class Editor extends React.Component<{}, IState> {
             activeFrameIndex={activeFrameIndex}
             frames={frames}
             onFrameClick={this.onFrameClick}
+            onFrameRightClick={this.onFrameRightClick}
           />
         </Toolbox>
       </Content>
