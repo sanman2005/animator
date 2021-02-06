@@ -7,10 +7,16 @@ $smallRadius = $borderRadius / 4
   shadow($size: 3px)
 
 .timeline
+  position relative
   display flex
   width 100%
   margin 35px 10px 10px
   shadowInset(2px)
+
+  &__mark
+    position absolute
+    top -25px
+    color $colorGray1
 
   &__frame
     position relative

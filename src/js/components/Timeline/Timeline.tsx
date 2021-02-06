@@ -12,6 +12,7 @@ interface ITimelineProps {
   frames: TFrame[];
   onFrameClick?: (index: number) => void;
   onFrameRightClick?: (index: number) => void;
+  seconds: number;
 }
 
 export class Timeline extends React.PureComponent<ITimelineProps> {
@@ -25,11 +26,20 @@ export class Timeline extends React.PureComponent<ITimelineProps> {
       frames,
       onFrameClick,
       onFrameRightClick,
+      seconds,
     } = this.props;
 
     return (
       <div className={cn(className, 'timelineWrapper')}>
         <div className='timeline'>
+          {Array.from(Array(seconds)).map((empty, time) => (
+            <div
+              className='timeline__mark'
+              style={{ left: `${(100 * time) / seconds}%` }}
+            >
+              {time} сек
+            </div>
+          ))}
           {frames.map((frame, index) => (
             <div
               className={cn('timeline__frame', {
@@ -39,7 +49,7 @@ export class Timeline extends React.PureComponent<ITimelineProps> {
                   : Object.values(frame).length,
               })}
               onClick={() => onFrameClick(index)}
-              onContextMenu={(event) => {
+              onContextMenu={event => {
                 event.preventDefault();
                 onFrameRightClick(index);
               }}

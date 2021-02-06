@@ -197,6 +197,7 @@ class Editor extends React.Component<{}, IState> {
             frames={frames}
             onFrameClick={this.onFrameClick}
             onFrameRightClick={this.onFrameRightClick}
+            seconds={ANIMATION_SECONDS}
           />
         </Toolbox>
       </Content>
