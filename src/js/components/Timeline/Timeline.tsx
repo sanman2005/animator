@@ -35,6 +35,7 @@ export class Timeline extends React.PureComponent<ITimelineProps> {
           {Array.from(Array(seconds)).map((empty, time) => (
             <div
               className='timeline__mark'
+              key={time}
               style={{ left: `${(100 * time) / seconds}%` }}
             >
               {time} сек
@@ -48,6 +49,7 @@ export class Timeline extends React.PureComponent<ITimelineProps> {
                   ? frame[activeElementId]
                   : Object.values(frame).length,
               })}
+              key={index}
               onClick={() => onFrameClick(index)}
               onContextMenu={event => {
                 event.preventDefault();

@@ -12,6 +12,7 @@ interface IToolboxProps {
   className?: string;
   items?: IToolboxItem[];
   position: 'left' | 'right' | 'top' | 'bottom';
+  withScroll?: boolean;
 }
 
 export const Toolbox: React.FC<IToolboxProps> = ({
@@ -20,10 +21,13 @@ export const Toolbox: React.FC<IToolboxProps> = ({
   className,
   items,
   position,
+  withScroll,
 }) => (
   <div
     className={cn(className, 'toolbox', `toolbox--${position}`, {
       'toolbox--column': ['left', 'right'].includes(position),
+      'toolbox--row': ['top', 'bottom'].includes(position),
+      'toolbox--with-scroll': withScroll,
     })}
   >
     {items?.map(item => (

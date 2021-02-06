@@ -10,6 +10,9 @@ $indent = 5px
   padding $indent
   shadowInset()
 
+  &--with-scroll
+    scrollbar()
+
   &--column
     flex-direction column
 
@@ -39,9 +42,7 @@ $indent = 5px
 
   &__item
     position relative
-    display flex
-    justify-content center
-    align-items center
+    flex($justify: center)
     width $width - $indent * 4
     height @width
     margin $indent

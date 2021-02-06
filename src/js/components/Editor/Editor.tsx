@@ -1,11 +1,14 @@
 import * as React from 'react';
 import { v4 as uuidv } from 'uuid';
 
+import { Category } from 'components/Category';
 import { Element } from 'components/Element';
 import { Content } from 'components/Grid';
 import { IScreenElement, Screen } from 'components/Screen';
 import { TFrame, Timeline } from 'components/Timeline';
 import { Toolbox } from 'components/Toolbox';
+
+import Elements from 'js/elements';
 
 const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
@@ -19,13 +22,6 @@ interface IState {
   sceneElements: IScreenElement[];
 }
 
-const templates: { [key: string]: string } = {
-  1: '/img/logo.png',
-  2: '/img/logo.png',
-};
-
-const templatesKeys = Object.keys(templates);
-
 class Editor extends React.Component<{}, IState> {
   state: IState = {
     activeSceneElementId: null,
@@ -34,13 +30,20 @@ class Editor extends React.Component<{}, IState> {
     sceneElements: [],
   };
 
-  elementsTemplates = templatesKeys.map(id => ({
-    id,
+  templatesByCategory = Object.keys(Elements).map(category => ({
+    id: category,
     content: (
-      <Element
-        image={templates[id]}
-        onClick={() => this.onToolboxItemClick(id)}
-      />
+      <Category
+        content={Elements[category].map((id: string) => (
+          <Element
+            image={id}
+            key={id}
+            onClick={() => this.onToolboxItemClick(id)}
+          />
+        ))}
+      >
+        {category}
+      </Category>
     ),
   }));
 
@@ -56,7 +59,7 @@ class Editor extends React.Component<{}, IState> {
       rotation: 0,
       content: (
         <Element
-          image={templates[templateId]}
+          image={templateId}
           onClick={() => this.onScreenElementClick(id)}
           onClickRight={() => this.onScreenElementRightClick(id)}
         />
@@ -182,12 +185,13 @@ class Editor extends React.Component<{}, IState> {
           onScreenClick={this.deactivateScreenElement}
         />
 
-        <Toolbox items={this.elementsTemplates} position='left' />
+        <Toolbox items={this.templatesByCategory} position='left' />
 
         <Toolbox
           activeItemId={activeSceneElementId}
           items={sceneElements}
           position='right'
+          withScroll
         />
 
         <Toolbox position='bottom'>

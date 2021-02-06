@@ -17,7 +17,7 @@ if (!env) {
 }
 
 const isProd = env === 'production';
-const isDevServer = process.argv.some(v => v.includes('webpack-dev-server'));
+const isDevServer = process.argv.some(v => v.includes('serve'));
 const localPort = 3000;
 
 process.env.APP_MODE = process.env.APP_MODE || 'work';
@@ -151,6 +151,13 @@ module.exports = {
       {
         test: /\.svg$/,
         loader: 'svg-react-loader',
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/,
+        loader: 'file-loader',
+        options: {
+          emitFile: false,
+        },
       },
     ],
   },

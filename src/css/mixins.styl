@@ -32,10 +32,10 @@ gradient($color, $colorDark)
 shadowSimple()
   filter drop-shadow(2px 2px 2px rgba($colorBlack, .5))
 
-shadowText(inverse = false)
+shadowText($inverse = false)
   will-change text-shadow
 
-  if inverse
+  if $inverse
     text-shadow -1px -1px 2px $colorShadowLightWeakText, 1px 1px 2px $colorShadowDarkWeakText
   else
     text-shadow 1px 1px 2px $colorShadowLightWeakText, -1px -1px 2px $colorShadowDarkWeakText
@@ -55,14 +55,14 @@ shadowInset($size = 5px)
     box-shadow 1px 1px 2px $colorShadowDark, -1px -1px 2px $colorShadowLight
     pointer-events none
 
-shadow($color = $colorShadowLight, $size = 7px, withHover = false, $colorDark = null)
+shadow($color = $colorShadowLight, $size = 7px, $withHover = false, $colorDark = null)
   position relative
   border-radius $borderRadius
   shadowText()
   border none
   will-change box-shadow
 
-  if withHover
+  if $withHover
     &:hover
       shadowInset($size * 0.6)
 

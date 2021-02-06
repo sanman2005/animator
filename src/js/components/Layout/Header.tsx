@@ -82,12 +82,12 @@ class Header extends React.Component<RouteComponentProps, THeaderState> {
         <Container>
           <div className='header__content'>
             <div className='header__links'>
-              <Button
+              {/* <Button
                 className='header__lang'
                 onClick={this.onChangeLang}
                 text={getLang()}
                 autosize
-              />
+              /> */}
               <Button
                 className='header__theme'
                 onClick={this.onChangeTheme}
