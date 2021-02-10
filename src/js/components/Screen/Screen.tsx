@@ -3,7 +3,7 @@ import cn from 'classnames';
 
 import { getMousePosition } from 'js/helpers';
 
-import '../../types';
+import 'js/types.d.ts';
 
 export interface IElement {
   position: Vector;

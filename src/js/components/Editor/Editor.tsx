@@ -190,6 +190,7 @@ class Editor extends React.Component<{}, IState> {
         <Toolbox
           activeItemId={activeSceneElementId}
           items={sceneElements}
+          onChangeItemIndex={console.log}
           position='right'
           withScroll
         />

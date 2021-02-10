@@ -62,7 +62,7 @@ export const geCountWord = (count: number, words: string[]) => {
   return words[2];
 };
 
-const getMousePosition = (event: React.MouseEvent<HTMLDivElement>) => ({
+export const getMousePosition = (event: React.MouseEvent<HTMLDivElement>) => ({
   x: event.pageX,
   y: event.pageY,
 });

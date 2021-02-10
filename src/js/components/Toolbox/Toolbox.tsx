@@ -3,7 +3,7 @@ import cn from 'classnames';
 
 import { getMousePosition } from 'js/helpers';
 
-import '../../types';
+import 'js/types.d.ts';
 
 export interface IToolboxItem {
   id: string;
@@ -14,42 +14,66 @@ interface IToolboxProps {
   activeItemId?: string;
   children?: React.ReactNode;
   className?: string;
-  draggable?: boolean;
   items?: IToolboxItem[];
+  onChangeItemIndex?: (item: IToolboxItem, index: number) => void;
   position: 'left' | 'right' | 'top' | 'bottom';
   withScroll?: boolean;
 }
 
-export class Toolbox extends React.PureComponent<IToolboxProps> {
-  state = {
+interface IToolboxState {
+  draggingItem: IToolboxItem | null;
+  itemHalfSize: number;
+  offset: Vector;
+  startMousePosition: Vector;
+}
+
+export class Toolbox extends React.PureComponent<IToolboxProps, IToolboxState> {
+  state: IToolboxState = {
     draggingItem: null,
-    itemSize: null,
-    lastMousePosition: null,
+    itemHalfSize: 0,
+    offset: { x: 0, y: 0 },
+    startMousePosition: { x: 0, y: 0 },
   };
 
   isVertical = ['left', 'right'].includes(this.props.position);
 
   startDrag = (event: React.MouseEvent<HTMLDivElement>, item: IToolboxItem) => {
-    const { position } = this.props;
     const { offsetHeight, offsetWidth } = event.currentTarget;
-    const itemSize = this.isVertical ? offsetHeight : offsetWidth;
+    const itemHalfSize = (this.isVertical ? offsetHeight : offsetWidth) * 0.5;
 
     this.setState({
       draggingItem: item,
-      itemSize,
-      lastMousePosition: getMousePosition(event),
+      itemHalfSize,
+      offset: { x: 0, y: 0 },
+      startMousePosition: getMousePosition(event),
     });
   };
 
   dragging = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!this.state.draggingItem) return;
 
+    const { items, onChangeItemIndex } = this.props;
+    const { draggingItem, itemHalfSize, startMousePosition } = this.state;
     const mousePosition = getMousePosition(event);
+    const offset = {
+      x: mousePosition.x - startMousePosition.x,
+      y: mousePosition.y - startMousePosition.y,
+    };
     const { isVertical } = this;
+    const needReplace =
+      Math.abs(isVertical ? offset.y : offset.x) > itemHalfSize;
 
-    this.setState({
-      lastMousePosition: mousePosition,
-    });
+    if (needReplace) {
+      const newIndex =
+        items.indexOf(draggingItem) +
+        Math.sign(isVertical ? offset.y : offset.x);
+
+      if (newIndex >= 0 && newIndex < items.length) {
+        onChangeItemIndex(draggingItem, newIndex);
+      }
+    }
+
+    this.setState({ offset });
   };
 
   stopDragging = () => this.setState({ draggingItem: null });
@@ -59,8 +83,8 @@ export class Toolbox extends React.PureComponent<IToolboxProps> {
       activeItemId,
       children,
       className,
-      draggable,
       items,
+      onChangeItemIndex,
       position,
       withScroll,
     } = this.props;
@@ -72,8 +96,8 @@ export class Toolbox extends React.PureComponent<IToolboxProps> {
           'toolbox--row': ['top', 'bottom'].includes(position),
           'toolbox--with-scroll': withScroll,
         })}
-        onMouseMove={this.dragging}
-        onMouseUp={this.stopDragging}
+        onMouseMoveCapture={this.dragging}
+        onMouseUpCapture={this.stopDragging}
       >
         {items?.map(item => (
           <div
@@ -82,7 +106,7 @@ export class Toolbox extends React.PureComponent<IToolboxProps> {
             })}
             key={item.id}
             onMouseDownCapture={
-              draggable ? event => this.startDrag(event, item) : null
+              onChangeItemIndex ? event => this.startDrag(event, item) : null
             }
           >
             {item.content}
