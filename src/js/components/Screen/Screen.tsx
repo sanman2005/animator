@@ -1,10 +1,9 @@
 import * as React from 'react';
 import cn from 'classnames';
 
-export interface Vector {
-  x: number;
-  y: number;
-}
+import { getMousePosition } from 'js/helpers';
+
+import '../../types';
 
 export interface IElement {
   position: Vector;
@@ -33,11 +32,6 @@ const getElementTransform = (element: IElement) =>
   `translate(${element.position.x}%, ${element.position.y}%) ` +
   `rotateZ(${element.rotation}deg) ` +
   `scale(${element.scale.x}, ${element.scale.y}) `;
-
-const getPosition = (event: React.MouseEvent<HTMLDivElement>) => ({
-  x: event.pageX,
-  y: event.pageY,
-});
 
 export const Screen: React.FC<IScreenProps> = ({
   activeElementId,
@@ -81,14 +75,14 @@ export const Screen: React.FC<IScreenProps> = ({
       }
 
       setEditingElementSize({ x: offsetWidth, y: offsetHeight });
-      setPosition(getPosition(event));
+      setPosition(getMousePosition(event));
     },
     [],
   );
 
   const onMouseMove = React.useCallback(
     event => {
-      const currentPosition = getPosition(event);
+      const currentPosition = getMousePosition(event);
 
       if (draggingElement) {
         const position = { ...draggingElement.position };

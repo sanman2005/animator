@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 export const env = process.env.NODE_ENV || 'production';
 export const isDev = process.env.NODE_ENV === 'local';
 export const isTest = process.env.APP_MODE === 'test';
@@ -60,8 +62,10 @@ export const geCountWord = (count: number, words: string[]) => {
   return words[2];
 };
 
-export const getFileSizeFormatted = (size: number) =>
-  `${Number(size / (1024 * 1024)).toFixed(1)} МБ`;
+const getMousePosition = (event: React.MouseEvent<HTMLDivElement>) => ({
+  x: event.pageX,
+  y: event.pageY,
+});
 
 export const media = {
   small: `(max-width: ${mobileWidth}px)`,

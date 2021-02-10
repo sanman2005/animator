@@ -18,3 +18,8 @@ declare module 'react-text-transition' {
   export const presets: any;
   export default textTransition;
 }
+
+declare interface Vector {
+  x: number;
+  y: number;
+}
