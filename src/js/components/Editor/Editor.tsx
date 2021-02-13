@@ -168,6 +168,17 @@ class Editor extends React.Component<{}, IState> {
     this.setState({ frames: newFrames });
   };
 
+  changeElementSortIndex = (id: string, index: number) => {
+    const { sceneElements } = this.state;
+    const currentIndex = sceneElements.findIndex(el => el.id === id);
+    const newSceneElements = [...sceneElements];
+
+    newSceneElements[index] = sceneElements[currentIndex];
+    newSceneElements[currentIndex] = sceneElements[index];
+
+    this.setState({ sceneElements: newSceneElements });
+  };
+
   render() {
     const {
       activeSceneElementId,
@@ -190,7 +201,7 @@ class Editor extends React.Component<{}, IState> {
         <Toolbox
           activeItemId={activeSceneElementId}
           items={sceneElements}
-          onChangeItemIndex={console.log}
+          onChangeItemIndex={this.changeElementSortIndex}
           position='right'
           withScroll
         />
