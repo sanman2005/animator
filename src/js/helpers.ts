@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import 'js/types.d.ts';
+
 export const env = process.env.NODE_ENV || 'production';
 export const isDev = process.env.NODE_ENV === 'local';
 export const isTest = process.env.APP_MODE === 'test';
@@ -65,6 +67,21 @@ export const geCountWord = (count: number, words: string[]) => {
 export const getMousePosition = (event: React.MouseEvent<HTMLDivElement>) => ({
   x: event.pageX,
   y: event.pageY,
+});
+
+export const vectorMulti = (a: IVector, b: number): IVector => ({
+  x: a.x * b,
+  y: a.y * b,
+});
+
+export const vectorsPlus = (a: IVector, b: IVector): IVector => ({
+  x: a.x + b.x,
+  y: a.y + b.y,
+});
+
+export const vectorsMinus = (a: IVector, b: IVector): IVector => ({
+  x: a.x - b.x,
+  y: a.y - b.y,
 });
 
 export const media = {

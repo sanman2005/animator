@@ -6,9 +6,9 @@ import { getMousePosition } from 'js/helpers';
 import 'js/types.d.ts';
 
 export interface IElement {
-  position: Vector;
+  position: IVector;
   rotation: number;
-  scale: Vector;
+  scale: IVector;
 }
 
 export interface IScreenElement extends IElement {
@@ -47,8 +47,8 @@ export const Screen: React.FC<IScreenProps> = ({
   const [resizingElement, setResizingElement] = React.useState<IScreenElement>(
     null,
   );
-  const [lastPosition, setPosition] = React.useState<Vector>(null);
-  const [editingElementSize, setEditingElementSize] = React.useState<Vector>(
+  const [lastPosition, setPosition] = React.useState<IVector>(null);
+  const [editingElementSize, setEditingElementSize] = React.useState<IVector>(
     null,
   );
 

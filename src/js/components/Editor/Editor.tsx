@@ -10,6 +10,10 @@ import { Toolbox } from 'components/Toolbox';
 
 import Elements from 'js/elements';
 
+import { interpolateElementsStates } from './EditorHelpers';
+
+import 'js/types.d.ts';
+
 const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
 
@@ -20,14 +24,16 @@ interface IState {
   activeFrameIndex: number;
   frames: TFrame[];
   sceneElements: IScreenElement[];
+  screenElementsByFrames: IScreenElement[][];
 }
 
 class Editor extends React.Component<{}, IState> {
   state: IState = {
     activeSceneElementId: null,
     activeFrameIndex: 0,
-    frames: Array.from(Array(animationFramesCount)).map(() => ({})),
+    frames: [...Array(animationFramesCount)].map(() => ({})),
     sceneElements: [],
+    screenElementsByFrames: [...Array(animationFramesCount)].map(() => []),
   };
 
   templatesByCategory = Object.keys(Elements).map(category => ({
@@ -46,6 +52,9 @@ class Editor extends React.Component<{}, IState> {
       </Category>
     ),
   }));
+
+  updateScene = (state: Partial<IState>) =>
+    this.setState(state as IState, this.calculateScreenElements);
 
   onToolboxItemClick = (templateId: string) => {
     const id = uuidv();
@@ -87,7 +96,7 @@ class Editor extends React.Component<{}, IState> {
       delete newFrames[index][id];
     });
 
-    this.setState({
+    this.updateScene({
       frames: newFrames,
       sceneElements: newSceneElements,
     });
@@ -112,8 +121,9 @@ class Editor extends React.Component<{}, IState> {
     newSceneElements[index] = element;
     newFrames[activeFrameIndex][id] = element;
 
-    this.setState({
+    this.updateScene({
       activeSceneElementId: id,
+      frames: newFrames,
       sceneElements: newSceneElements,
     });
   };
@@ -154,7 +164,7 @@ class Editor extends React.Component<{}, IState> {
 
     newFrames[frameIndex][element.id] = element;
 
-    this.setState({ frames: newFrames });
+    this.updateScene({ frames: newFrames });
   };
 
   removeElementFromFrame = (id: string, frameIndex: number) => {
@@ -165,7 +175,7 @@ class Editor extends React.Component<{}, IState> {
 
     delete newFrames[frameIndex][id];
 
-    this.setState({ frames: newFrames });
+    this.updateScene({ frames: newFrames });
   };
 
   changeElementSortIndex = (id: string, index: number) => {
@@ -176,7 +186,17 @@ class Editor extends React.Component<{}, IState> {
     newSceneElements[index] = sceneElements[currentIndex];
     newSceneElements[currentIndex] = sceneElements[index];
 
-    this.setState({ sceneElements: newSceneElements });
+    this.updateScene({ sceneElements: newSceneElements });
+  };
+
+  calculateScreenElements = () => {
+    const { frames, sceneElements } = this.state;
+    const screenElementsByFrames = interpolateElementsStates(
+      sceneElements,
+      frames,
+    );
+
+    this.setState({ screenElementsByFrames });
   };
 
   render() {
@@ -185,13 +205,14 @@ class Editor extends React.Component<{}, IState> {
       activeFrameIndex,
       frames,
       sceneElements,
+      screenElementsByFrames,
     } = this.state;
 
     return (
       <Content className='home' centerContent>
         <Screen
           activeElementId={activeSceneElementId}
-          elements={Object.values(frames[activeFrameIndex])}
+          elements={screenElementsByFrames[activeFrameIndex]}
           onChangeElement={this.updateScreenElement}
           onScreenClick={this.deactivateScreenElement}
         />

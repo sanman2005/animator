@@ -23,8 +23,8 @@ interface IToolboxProps {
 interface IToolboxState {
   draggingItemId?: string;
   itemHalfSize: number;
-  offset: Vector;
-  startMousePosition: Vector;
+  offset: IVector;
+  startMousePosition: IVector;
 }
 
 export class Toolbox extends React.PureComponent<IToolboxProps, IToolboxState> {

@@ -19,7 +19,7 @@ declare module 'react-text-transition' {
   export default textTransition;
 }
 
-declare interface Vector {
+declare interface IVector {
   x: number;
   y: number;
 }
