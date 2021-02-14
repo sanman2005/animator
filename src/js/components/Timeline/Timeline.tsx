@@ -16,6 +16,7 @@ interface ITimelineProps {
   onFrameClick?: (index: number) => void;
   onFrameRightClick?: (index: number) => void;
   onPlay: () => void;
+  onRecord: () => void;
   seconds: number;
 }
 
@@ -27,6 +28,7 @@ export const Timeline: React.FC<ITimelineProps> = ({
   onFrameClick,
   onFrameRightClick,
   onPlay,
+  onRecord,
   seconds,
 }) => (
   <>
@@ -64,9 +66,18 @@ export const Timeline: React.FC<ITimelineProps> = ({
     </div>
 
     <Button
-      className='timelinePlay'
+      className='timelineButton'
       icon={<Icons.triangle />}
       onClick={onPlay}
+      shape='circle'
+      type='icon-main'
+      shadow
+    />
+
+    <Button
+      className='timelineButton'
+      icon={<Icons.circle />}
+      onClick={onRecord}
       shape='circle'
       type='icon-main'
       shadow

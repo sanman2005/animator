@@ -36,10 +36,11 @@ $smallRadius = $borderRadius / 4
       &, &:hover
         highlight($radius: $smallRadius)
 
-.timelinePlay
+.timelineButton
   margin 15px
+  flex-shrink 0
 
-  svg
+  &:first-of-type svg
     transform rotateZ(-90deg) translateY(2px)
 
 .timelineWrapper

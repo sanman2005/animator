@@ -24,6 +24,7 @@ interface IScreenProps {
   animationTime: number;
   className?: string;
   elements: IScreenElement[];
+  getRef?: (ref: HTMLElement) => void;
   onChangeElement?: (element: IScreenElement) => void;
   onScreenClick?: () => void;
   screen?: IElement;
@@ -39,6 +40,7 @@ export const Screen: React.FC<IScreenProps> = ({
   animationTime,
   className,
   elements,
+  getRef,
   onChangeElement,
   onScreenClick,
   screen,
@@ -136,12 +138,16 @@ export const Screen: React.FC<IScreenProps> = ({
         !draggingElement && !resizingElement && onScreenClick()
       }
       onContextMenuCapture={event => event.preventDefault()}
+      ref={getRef}
     >
       <div
         className='screen'
         onMouseMoveCapture={onMouseMove}
         onMouseUpCapture={stopDrag}
-        style={{ transform: screen && getElementTransform(screen) }}
+        style={{
+          transform: screen && getElementTransform(screen),
+          transitionDuration: `${animationTime}s`,
+        }}
       >
         {elements.map(element => (
           <div

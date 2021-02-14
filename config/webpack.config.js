@@ -55,6 +55,9 @@ module.exports = {
       pages: path.resolve(srcPath, './js/pages'),
     },
     mainFields: ['module', 'main'],
+    fallback: {
+      stream: 'stream-browserify',
+    },
   },
   plugins: [
     new CleanWebpackPlugin(),
@@ -77,6 +80,10 @@ module.exports = {
         to: './img',
       },
     ]),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser',
+    }),
     new webpack.DefinePlugin(
       Object.keys(process.env).reduce(
         (result, key) => ({

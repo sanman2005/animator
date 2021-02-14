@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { v4 as uuidv } from 'uuid';
+import html2canvas from 'html2canvas';
+import * as GIFEncoder from 'gifencoder';
 
 import { Category } from 'components/Category';
 import { Element } from 'components/Element';
@@ -26,6 +28,7 @@ interface IState {
   activeFrameIndex: number;
   frames: TFrame[];
   playing: boolean;
+  recording: boolean;
   sceneElements: IScreenElement[];
   screenElementsByFrames: IScreenElement[][];
 }
@@ -36,11 +39,15 @@ class Editor extends React.Component<{}, IState> {
     activeFrameIndex: 0,
     frames: [...Array(animationFramesCount)].map(() => ({})),
     playing: false,
+    recording: false,
     sceneElements: [],
     screenElementsByFrames: [...Array(animationFramesCount)].map(() => []),
   };
 
   playInterval: NodeJS.Timeout = null;
+
+  screen: HTMLDivElement = null;
+  gifEncoder: GIFEncoder = null;
 
   templatesByCategory = Object.keys(Elements).map(category => ({
     id: category,
@@ -227,15 +234,24 @@ class Editor extends React.Component<{}, IState> {
   };
 
   onPlay = () => {
-    const { frames, playing } = this.state;
+    const { frames, playing, recording } = this.state;
 
     if (playing) {
       clearInterval(this.playInterval);
     } else {
-      this.playInterval = setInterval(() => {
+      this.playInterval = setInterval(async () => {
         const { activeFrameIndex } = this.state;
-        const nextIndex =
-          activeFrameIndex >= frames.length - 1 ? 0 : activeFrameIndex + 1;
+        const isLastFrame = activeFrameIndex >= frames.length - 1;
+        const nextIndex = isLastFrame ? 0 : activeFrameIndex + 1;
+
+        if (recording) {
+          if (isLastFrame) {
+            this.setState({ playing: false, recording: false });
+            this.saveRecord();
+          } else {
+            this.gifEncoder.addFrame(await this.getScreenshot());
+          }
+        }
 
         this.setState({ activeFrameIndex: nextIndex });
       }, ANIMATION_FRAME_SECONDS * 1000);
@@ -276,6 +292,36 @@ class Editor extends React.Component<{}, IState> {
     this.updateScene({ frames, sceneElements });
   };
 
+  setScreen = (node: HTMLDivElement) => (this.screen = node);
+
+  getScreenshot = () =>
+    html2canvas(this.screen).then(canvas => canvas.getContext('2d'));
+
+  onRecord = async () => {
+    const { canvas } = await this.getScreenshot();
+    const gifEncoder = new GIFEncoder(canvas.width, canvas.height);
+    const stream = gifEncoder
+      .createWriteStream({
+        delay: ANIMATION_FRAME_SECONDS * 1000,
+        quality: 10,
+        repeat: 0,
+      });
+
+    gifEncoder.createReadStream().pipe(stream);
+
+    gifEncoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
+    gifEncoder.setDelay(ANIMATION_FRAME_SECONDS * 1000); // frame delay in ms
+    gifEncoder.setQuality(10); // image quality. 10 is default.
+    gifEncoder.start();
+
+    this.gifEncoder = gifEncoder;
+    this.setState({ activeFrameIndex: 0, recording: true }, this.onPlay);
+  };
+
+  saveRecord = () => {
+    this.gifEncoder.finish();
+  };
+
   render() {
     const {
       activeSceneElementId,
@@ -291,6 +337,7 @@ class Editor extends React.Component<{}, IState> {
           activeElementId={activeSceneElementId}
           animationTime={ANIMATION_FRAME_SECONDS}
           elements={screenElementsByFrames[activeFrameIndex]}
+          getRef={this.setScreen}
           onChangeElement={this.updateScreenElement}
           onScreenClick={this.deactivateScreenElement}
         />
@@ -313,6 +360,7 @@ class Editor extends React.Component<{}, IState> {
             onFrameClick={this.onFrameClick}
             onFrameRightClick={this.onFrameRightClick}
             onPlay={this.onPlay}
+            onRecord={this.onRecord}
             seconds={ANIMATION_SECONDS}
           />
         </Toolbox>
