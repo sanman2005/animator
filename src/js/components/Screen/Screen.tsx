@@ -21,6 +21,7 @@ export interface IScreenElement extends IElement {
 
 interface IScreenProps {
   activeElementId?: string;
+  animationTime: number;
   className?: string;
   elements: IScreenElement[];
   onChangeElement?: (element: IScreenElement) => void;
@@ -35,6 +36,7 @@ const getElementTransform = (element: IElement) =>
 
 export const Screen: React.FC<IScreenProps> = ({
   activeElementId,
+  animationTime,
   className,
   elements,
   onChangeElement,
@@ -151,11 +153,12 @@ export const Screen: React.FC<IScreenProps> = ({
             onMouseDownCapture={event => startEdit(event, element)}
             onWheel={event => rotateElement(event, element)}
             style={{
-              transform: getElementTransform(element),
-              width: `${element.width}%`,
               height: `${element.height}%`,
               left: `calc(50% - ${element.width / 2}%)`,
               top: `calc(50% - ${element.height / 2}%)`,
+              transform: getElementTransform(element),
+              transitionDuration: `${animationTime}s`,
+              width: `${element.width}%`,
             }}
           >
             {element.content}

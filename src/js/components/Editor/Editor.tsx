@@ -17,12 +17,15 @@ import 'js/types.d.ts';
 const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
 
+const STORAGE_SCENE_KEY = 'scene';
+
 const animationFramesCount = ANIMATION_SECONDS / ANIMATION_FRAME_SECONDS;
 
 interface IState {
   activeSceneElementId: string;
   activeFrameIndex: number;
   frames: TFrame[];
+  playing: boolean;
   sceneElements: IScreenElement[];
   screenElementsByFrames: IScreenElement[][];
 }
@@ -32,9 +35,12 @@ class Editor extends React.Component<{}, IState> {
     activeSceneElementId: null,
     activeFrameIndex: 0,
     frames: [...Array(animationFramesCount)].map(() => ({})),
+    playing: false,
     sceneElements: [],
     screenElementsByFrames: [...Array(animationFramesCount)].map(() => []),
   };
+
+  playInterval: NodeJS.Timeout = null;
 
   templatesByCategory = Object.keys(Elements).map(category => ({
     id: category,
@@ -53,8 +59,27 @@ class Editor extends React.Component<{}, IState> {
     ),
   }));
 
+  componentDidMount() {
+    document.addEventListener('keydown', this.onKeyDown);
+
+    this.onLoad();
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.onKeyDown);
+  }
+
   updateScene = (state: Partial<IState>) =>
     this.setState(state as IState, this.calculateScreenElements);
+
+  onKeyDown = (event: KeyboardEvent) => {
+    const handlers: { [key: string]: (event: KeyboardEvent) => void } = {
+      KeyS: this.onSave,
+      Space: this.onPlay,
+    };
+
+    if (handlers[event.code]) handlers[event.code](event);
+  };
 
   onToolboxItemClick = (templateId: string) => {
     const id = uuidv();
@@ -66,17 +91,19 @@ class Editor extends React.Component<{}, IState> {
       position: { x: 0, y: 0 },
       scale: { x: 1, y: 1 },
       rotation: 0,
-      content: (
-        <Element
-          image={templateId}
-          onClick={() => this.onScreenElementClick(id)}
-          onClickRight={() => this.onScreenElementRightClick(id)}
-        />
-      ),
+      content: this.renderElementContent(id, templateId),
     };
 
     this.addScreenElement(screenElement);
   };
+
+  renderElementContent = (id: string, templateId: string) => (
+    <Element
+      image={templateId}
+      onClick={() => this.onScreenElementClick(id)}
+      onClickRight={() => this.onScreenElementRightClick(id)}
+    />
+  );
 
   onScreenElementClick = (id: string) =>
     this.setState({ activeSceneElementId: id });
@@ -199,6 +226,56 @@ class Editor extends React.Component<{}, IState> {
     this.setState({ screenElementsByFrames });
   };
 
+  onPlay = () => {
+    const { frames, playing } = this.state;
+
+    if (playing) {
+      clearInterval(this.playInterval);
+    } else {
+      this.playInterval = setInterval(() => {
+        const { activeFrameIndex } = this.state;
+        const nextIndex =
+          activeFrameIndex >= frames.length - 1 ? 0 : activeFrameIndex + 1;
+
+        this.setState({ activeFrameIndex: nextIndex });
+      }, ANIMATION_FRAME_SECONDS * 1000);
+    }
+
+    this.setState({ playing: !playing });
+  };
+
+  onSave = (event: KeyboardEvent) => {
+    const { frames, sceneElements } = this.state;
+
+    if (!event.ctrlKey) return;
+
+    event.preventDefault();
+
+    const data = { frames, sceneElements };
+
+    localStorage.setItem(STORAGE_SCENE_KEY, JSON.stringify(data));
+  };
+
+  onLoad = () => {
+    const data = localStorage.getItem(STORAGE_SCENE_KEY);
+
+    if (!data) return;
+
+    const { frames, sceneElements } = JSON.parse(data) as IState;
+
+    sceneElements.forEach(element => {
+      const { id, idTemplate } = element;
+
+      element.content = this.renderElementContent(id, idTemplate);
+
+      frames.forEach(
+        frame => frame[id] && (frame[id].content = element.content),
+      );
+    });
+
+    this.updateScene({ frames, sceneElements });
+  };
+
   render() {
     const {
       activeSceneElementId,
@@ -212,6 +289,7 @@ class Editor extends React.Component<{}, IState> {
       <Content className='home' centerContent>
         <Screen
           activeElementId={activeSceneElementId}
+          animationTime={ANIMATION_FRAME_SECONDS}
           elements={screenElementsByFrames[activeFrameIndex]}
           onChangeElement={this.updateScreenElement}
           onScreenClick={this.deactivateScreenElement}
@@ -234,6 +312,7 @@ class Editor extends React.Component<{}, IState> {
             frames={frames}
             onFrameClick={this.onFrameClick}
             onFrameRightClick={this.onFrameRightClick}
+            onPlay={this.onPlay}
             seconds={ANIMATION_SECONDS}
           />
         </Toolbox>
