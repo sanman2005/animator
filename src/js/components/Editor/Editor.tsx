@@ -44,7 +44,7 @@ class Editor extends React.Component<{}, IState> {
     screenElementsByFrames: [...Array(animationFramesCount)].map(() => []),
   };
 
-  playInterval: NodeJS.Timeout = null;
+  playTimeoutId: NodeJS.Timeout = null;
 
   screen: HTMLDivElement = null;
   gifEncoder: GIFEncoder = null;
@@ -237,9 +237,9 @@ class Editor extends React.Component<{}, IState> {
     const { frames, playing, recording } = this.state;
 
     if (playing) {
-      clearInterval(this.playInterval);
+      clearInterval(this.playTimeoutId);
     } else {
-      this.playInterval = setInterval(async () => {
+      this.playTimeoutId = setTimeout(async () => {
         const { activeFrameIndex } = this.state;
         const isLastFrame = activeFrameIndex >= frames.length - 1;
         const nextIndex = isLastFrame ? 0 : activeFrameIndex + 1;
@@ -248,12 +248,17 @@ class Editor extends React.Component<{}, IState> {
           if (isLastFrame) {
             this.setState({ playing: false, recording: false });
             this.saveRecord();
+
+            return;
           } else {
             this.gifEncoder.addFrame(await this.getScreenshot());
           }
         }
 
-        this.setState({ activeFrameIndex: nextIndex });
+        this.setState(
+          { activeFrameIndex: nextIndex, playing: false },
+          this.onPlay,
+        );
       }, ANIMATION_FRAME_SECONDS * 1000);
     }
 
@@ -300,14 +305,16 @@ class Editor extends React.Component<{}, IState> {
   onRecord = async () => {
     const { canvas } = await this.getScreenshot();
     const gifEncoder = new GIFEncoder(canvas.width, canvas.height);
-    const stream = gifEncoder
-      .createWriteStream({
-        delay: ANIMATION_FRAME_SECONDS * 1000,
-        quality: 10,
-        repeat: 0,
-      });
+    // @ts-ignore
+    const newHandle = await window.showSaveFilePicker();
+    const stream = await newHandle.createWritable();
 
-    gifEncoder.createReadStream().pipe(stream);
+    stream.on = (data: any) => console.log(data);
+    stream.once = (data: any) => console.log(data);
+    stream.emit = (content: any) => stream.write(content);
+    stream.end = () => stream.close();
+
+    gifEncoder.createReadStream().pipe(stream)
 
     gifEncoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
     gifEncoder.setDelay(ANIMATION_FRAME_SECONDS * 1000); // frame delay in ms

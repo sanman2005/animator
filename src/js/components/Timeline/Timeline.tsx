@@ -32,10 +32,7 @@ export const Timeline: React.FC<ITimelineProps> = ({
   seconds,
 }) => (
   <>
-    <div
-      className={cn(className, 'timelineWrapper')}
-      onKeyDown={event => console.log(event)}
-    >
+    <div className={cn(className, 'timelineWrapper')}>
       <div className='timeline'>
         {Array.from(Array(seconds)).map((empty, time) => (
           <div
