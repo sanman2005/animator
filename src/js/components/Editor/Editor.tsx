@@ -308,12 +308,6 @@ class Editor extends React.Component<{}, IState> {
   onRecord = async () => {
     const { height, width } = this.screen.getBoundingClientRect();
     const gifEncoder = new GIFEncoder(width, height);
-
-    gifEncoder.start();
-    gifEncoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
-    gifEncoder.setDelay(ANIMATION_FRAME_SECONDS * 1000); // frame delay in ms
-    gifEncoder.setQuality(10); // image quality. 10 is default.
-
     // @ts-ignore
     const file = await window.showSaveFilePicker({
       types: [{
@@ -325,10 +319,15 @@ class Editor extends React.Component<{}, IState> {
 
     stream.on = () => {};
     stream.once = () => {};
-    stream.emit = (content: any) => stream.write(content);
+    stream.emit = () => {};
     stream.end = () => stream.close();
 
     gifEncoder.createReadStream().pipe(stream);
+
+    gifEncoder.start();
+    gifEncoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
+    gifEncoder.setDelay(ANIMATION_FRAME_SECONDS * 1000); // frame delay in ms
+    gifEncoder.setQuality(10); // image quality. 10 is default.
 
     this.gifEncoder = gifEncoder;
     this.setState({ activeFrameIndex: 0, recording: true }, this.onPlay);
