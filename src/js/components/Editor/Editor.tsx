@@ -239,27 +239,30 @@ class Editor extends React.Component<{}, IState> {
     if (playing) {
       clearInterval(this.playTimeoutId);
     } else {
-      this.playTimeoutId = setTimeout(async () => {
-        const { activeFrameIndex } = this.state;
-        const isLastFrame = activeFrameIndex >= frames.length - 1;
-        const nextIndex = isLastFrame ? 0 : activeFrameIndex + 1;
+      this.playTimeoutId = setTimeout(
+        async () => {
+          const { activeFrameIndex } = this.state;
+          const isLastFrame = activeFrameIndex >= frames.length - 1;
+          const nextIndex = isLastFrame ? 0 : activeFrameIndex + 1;
 
-        if (recording) {
-          if (isLastFrame) {
-            this.setState({ playing: false, recording: false });
-            this.saveRecord();
+          if (recording) {
+            if (isLastFrame) {
+              this.setState({ playing: false, recording: false });
+              this.saveRecord();
 
-            return;
-          } else {
-            this.gifEncoder.addFrame(await this.getScreenshot());
+              return;
+            } else {
+              this.gifEncoder.addFrame(await this.getScreenshot());
+            }
           }
-        }
 
-        this.setState(
-          { activeFrameIndex: nextIndex, playing: false },
-          this.onPlay,
-        );
-      }, ANIMATION_FRAME_SECONDS * 1000);
+          this.setState(
+            { activeFrameIndex: nextIndex, playing: false },
+            this.onPlay,
+          );
+        },
+        recording ? 0 : ANIMATION_FRAME_SECONDS * 1000,
+      );
     }
 
     this.setState({ playing: !playing });
@@ -303,31 +306,35 @@ class Editor extends React.Component<{}, IState> {
     html2canvas(this.screen).then(canvas => canvas.getContext('2d'));
 
   onRecord = async () => {
-    const { canvas } = await this.getScreenshot();
-    const gifEncoder = new GIFEncoder(canvas.width, canvas.height);
-    // @ts-ignore
-    const newHandle = await window.showSaveFilePicker();
-    const stream = await newHandle.createWritable();
+    const { height, width } = this.screen.getBoundingClientRect();
+    const gifEncoder = new GIFEncoder(width, height);
 
-    stream.on = (data: any) => console.log(data);
-    stream.once = (data: any) => console.log(data);
-    stream.emit = (content: any) => stream.write(content);
-    stream.end = () => stream.close();
-
-    gifEncoder.createReadStream().pipe(stream)
-
+    gifEncoder.start();
     gifEncoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
     gifEncoder.setDelay(ANIMATION_FRAME_SECONDS * 1000); // frame delay in ms
     gifEncoder.setQuality(10); // image quality. 10 is default.
-    gifEncoder.start();
+
+    // @ts-ignore
+    const file = await window.showSaveFilePicker({
+      types: [{
+        description: 'Gif',
+        accept: {'image/gif': ['.gif']},
+      }],
+    });
+    const stream = await file.createWritable();
+
+    stream.on = () => {};
+    stream.once = () => {};
+    stream.emit = (content: any) => stream.write(content);
+    stream.end = () => stream.close();
+
+    gifEncoder.createReadStream().pipe(stream);
 
     this.gifEncoder = gifEncoder;
     this.setState({ activeFrameIndex: 0, recording: true }, this.onPlay);
   };
 
-  saveRecord = () => {
-    this.gifEncoder.finish();
-  };
+  saveRecord = () => this.gifEncoder.finish();
 
   render() {
     const {
