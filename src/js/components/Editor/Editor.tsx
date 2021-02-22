@@ -251,8 +251,6 @@ class Editor extends React.Component<{}, IState> {
               this.saveRecord();
 
               return;
-            } else {
-              this.gifEncoder.addFrame(await this.getScreenshot());
             }
           }
 
@@ -302,18 +300,21 @@ class Editor extends React.Component<{}, IState> {
 
   setScreen = (node: HTMLDivElement) => (this.screen = node);
 
-  getScreenshot = () =>
-    html2canvas(this.screen).then(canvas => canvas.getContext('2d'));
+  setScreenshot = (context: CanvasRenderingContext2D) =>
+    // this.gifEncoder.addFrame(context);
+    console.log(1);
 
   onRecord = async () => {
     const { height, width } = this.screen.getBoundingClientRect();
     const gifEncoder = new GIFEncoder(width, height);
     // @ts-ignore
     const file = await window.showSaveFilePicker({
-      types: [{
-        description: 'Gif',
-        accept: {'image/gif': ['.gif']},
-      }],
+      types: [
+        {
+          description: 'Gif',
+          accept: { 'image/gif': ['.gif'] },
+        },
+      ],
     });
     const stream = await file.createWritable();
 
@@ -353,6 +354,7 @@ class Editor extends React.Component<{}, IState> {
           elements={screenElementsByFrames[activeFrameIndex]}
           getRef={this.setScreen}
           onChangeElement={this.updateScreenElement}
+          onDrawCanvas={this.setScreenshot}
           onScreenClick={this.deactivateScreenElement}
         />
 

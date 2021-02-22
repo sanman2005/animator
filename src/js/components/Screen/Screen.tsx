@@ -59,22 +59,34 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
     if (!canvas || !onDrawCanvas) return;
 
     const context = canvas.getContext('2d');
-    let waitImagesCount = 0;
+    let waitImagesCount = elements.length;
 
-    elements.forEach(element => {
-      const image = new Image();
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-      image.onload = () => {
-        context.rotate((Math.PI / 180) * 25);
-        context.drawImage(image, 0, 0, 0, 0);
-        waitImagesCount--;
+    elements.forEach(
+      ({ height, idTemplate, rotation, position, scale, width }) => {
+        const image = new Image();
+        const koef = 0.01;
+        const scaledWidth = canvas.width * width * koef * scale.x;
+        const scaledHeight = canvas.height * height * koef * scale.y;
+        const x =
+          canvas.width * (0.5 + width * position.x * koef * koef) -
+          scaledWidth * 0.5;
+        const y =
+          canvas.height * (0.5 + height * position.y * koef * koef) -
+          scaledHeight * 0.5;
 
-        if (!waitImagesCount) onDrawCanvas(context);
-      };
+        image.onload = () => {
+          // context.rotate((Math.PI / 180) * 25);
+          context.drawImage(image, x, y, scaledWidth, scaledHeight);
+          waitImagesCount--;
 
-      waitImagesCount++;
-      image.src = element.idTemplate;
-    });
+          if (!waitImagesCount) onDrawCanvas(context);
+        };
+
+        image.src = idTemplate;
+      },
+    );
   };
 
   onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -168,6 +180,8 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
       transitionDuration: `${animationTime}s`,
     };
 
+    record || this.draw(); // TODO: replace with &&
+
     return (
       <div
         className={cn(className, 'screenWrapper')}
@@ -194,8 +208,8 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
               onWheel={event => this.rotateElement(event, element)}
               style={{
                 height: `${element.height}%`,
-                left: `calc(50% - ${element.width / 2}%)`,
-                top: `calc(50% - ${element.height / 2}%)`,
+                left: `calc(${50 - element.width / 2}%)`,
+                top: `calc(${50 - element.height / 2}%)`,
                 transform: getElementTransform(element),
                 transitionDuration: `${animationTime}s`,
                 width: `${element.width}%`,
@@ -206,16 +220,13 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
           ))}
         </div>
 
-        {record ||
-          ((
-            // TODO: replace with &&
-            <canvas
-              className='screenCanvas'
-              ref={ref => (this.canvas = ref)}
-              style={screenStyle}
-            />
-          ) &&
-            this.draw())}
+        {record || ( // TODO: replace with &&
+          <canvas
+            className='screenCanvas'
+            ref={ref => (this.canvas = ref)}
+            style={screenStyle}
+          />
+        )}
       </div>
     );
   }
