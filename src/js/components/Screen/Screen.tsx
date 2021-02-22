@@ -203,42 +203,42 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
         onContextMenuCapture={event => event.preventDefault()}
         ref={getRef}
       >
-        <div
-          className='screen'
-          onMouseMoveCapture={this.onMouseMove}
-          onMouseUpCapture={this.stopDrag}
-          style={screenStyle}
-        >
-          {elements.map(element => (
-            <div
-              className={cn('screenElement', {
-                'screenElement--active': activeElementId === element.id,
-              })}
-              key={element.id}
-              onContextMenuCapture={event => this.startEdit(event, element)}
-              onMouseDownCapture={event => this.startEdit(event, element)}
-              onWheel={event => this.rotateElement(event, element)}
-              style={{
-                height: `${element.height}%`,
-                left: `calc(${50 - element.width / 2}%)`,
-                top: `calc(${50 - element.height / 2}%)`,
-                transform: getElementTransform(element),
-                transitionDuration: `${animationTime}s`,
-                width: `${element.width}%`,
-              }}
-            >
-              {element.content}
-            </div>
-          ))}
-        </div>
-
-        {record && (
+        {record ? (
           <canvas
             className='screenCanvas'
             height={recordResolution?.y}
             ref={ref => (this.canvas = ref)}
             width={recordResolution?.x}
           />
+        ) : (
+          <div
+            className='screen'
+            onMouseMoveCapture={this.onMouseMove}
+            onMouseUpCapture={this.stopDrag}
+            style={screenStyle}
+          >
+            {elements.map(element => (
+              <div
+                className={cn('screenElement', {
+                  'screenElement--active': activeElementId === element.id,
+                })}
+                key={element.id}
+                onContextMenuCapture={event => this.startEdit(event, element)}
+                onMouseDownCapture={event => this.startEdit(event, element)}
+                onWheel={event => this.rotateElement(event, element)}
+                style={{
+                  height: `${element.height}%`,
+                  left: `calc(${50 - element.width / 2}%)`,
+                  top: `calc(${50 - element.height / 2}%)`,
+                  transform: getElementTransform(element),
+                  transitionDuration: `${animationTime}s`,
+                  width: `${element.width}%`,
+                }}
+              >
+                {element.content}
+              </div>
+            ))}
+          </div>
         )}
       </div>
     );
