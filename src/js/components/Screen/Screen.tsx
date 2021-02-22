@@ -25,9 +25,10 @@ interface IScreenProps {
   className?: string;
   elements: IScreenElement[];
   getRef?: (ref: HTMLElement) => void;
-  onCanvasDraw?: (context: CanvasRenderingContext2D) => void;
+  onDrawCanvas?: (context: CanvasRenderingContext2D) => void;
   onChangeElement?: (element: IScreenElement) => void;
   onScreenClick?: () => void;
+  record?: boolean;
   screen?: IElement;
 }
 
@@ -50,6 +51,31 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
   };
   lastMousePosition: IVector = { x: 0, y: 0 };
   canvas: HTMLCanvasElement = null;
+
+  draw = () => {
+    const { elements, onDrawCanvas } = this.props;
+    const { canvas } = this;
+
+    if (!canvas || !onDrawCanvas) return;
+
+    const context = canvas.getContext('2d');
+    let waitImagesCount = 0;
+
+    elements.forEach(element => {
+      const image = new Image();
+
+      image.onload = () => {
+        context.rotate((Math.PI / 180) * 25);
+        context.drawImage(image, 0, 0, 0, 0);
+        waitImagesCount--;
+
+        if (!waitImagesCount) onDrawCanvas(context);
+      };
+
+      waitImagesCount++;
+      image.src = element.idTemplate;
+    });
+  };
 
   onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const { onChangeElement } = this.props;
@@ -131,6 +157,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
       elements,
       getRef,
       onScreenClick,
+      record,
       screen,
     } = this.props;
 
@@ -179,12 +206,16 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
           ))}
         </div>
 
-        <canvas
-          height='100%'
-          ref={ref => (this.canvas = ref)}
-          style={screenStyle}
-          width='100%'
-        />
+        {record ||
+          ((
+            // TODO: replace with &&
+            <canvas
+              className='screenCanvas'
+              ref={ref => (this.canvas = ref)}
+              style={screenStyle}
+            />
+          ) &&
+            this.draw())}
       </div>
     );
   }
