@@ -361,7 +361,7 @@ class Editor extends React.Component<{}, IState> {
           elements={screenElementsByFrames[activeFrameIndex]}
           getRef={this.setScreen}
           onChangeElement={this.updateScreenElement}
-          onDrawCanvas={recording ? this.setScreenshot : null}
+          onDrawCanvas={this.setScreenshot}
           onScreenClick={this.deactivateScreenElement}
           record={recording}
           recordResolution={recordResolution}

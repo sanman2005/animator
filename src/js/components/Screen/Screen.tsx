@@ -69,13 +69,21 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
       ({ height, idTemplate, rotation, position, scale, width }) => {
         const image = new Image();
         const koef = 0.01;
-        const scaledWidth = canvas.width * width * koef * scale.x;
-        const scaledHeight = canvas.height * height * koef * scale.y;
         const x = canvas.width * (0.5 + width * position.x * koef * koef);
         const y = canvas.height * (0.5 + height * position.y * koef * koef);
         const angle = (Math.PI / 180) * rotation;
 
         image.onload = () => {
+          const { naturalHeight, naturalWidth } = image;
+          const ratio = naturalWidth / naturalHeight;
+          const canvasRatio = canvas.width / canvas.height;
+          const correctWidth =
+            ratio >= canvasRatio ? width : width / canvasRatio;
+          const correctHeight =
+            ratio < canvasRatio ? height : height * canvasRatio;
+          let scaledWidth = canvas.width * correctWidth * koef * scale.x;
+          let scaledHeight = canvas.height * correctHeight * koef * scale.y;
+
           context.translate(x, y);
           context.rotate(angle);
 
