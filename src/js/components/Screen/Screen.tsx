@@ -1,7 +1,7 @@
 import * as React from 'react';
 import cn from 'classnames';
 
-import { getMousePosition } from 'js/helpers';
+import { getMousePosition, vectorsMinus } from 'js/helpers';
 
 import 'js/types.d.ts';
 
@@ -25,9 +25,16 @@ interface IScreenProps {
   className?: string;
   elements: IScreenElement[];
   getRef?: (ref: HTMLElement) => void;
+  onCanvasDraw?: (context: CanvasRenderingContext2D) => void;
   onChangeElement?: (element: IScreenElement) => void;
   onScreenClick?: () => void;
   screen?: IElement;
+}
+
+interface IScreenState {
+  draggingElement: IScreenElement;
+  editingElementSize: IVector;
+  resizingElement: IScreenElement;
 }
 
 const getElementTransform = (element: IElement) =>
@@ -35,142 +42,138 @@ const getElementTransform = (element: IElement) =>
   `rotateZ(${element.rotation}deg) ` +
   `scale(${element.scale.x}, ${element.scale.y}) `;
 
-export const Screen: React.FC<IScreenProps> = ({
-  activeElementId,
-  animationTime,
-  className,
-  elements,
-  getRef,
-  onChangeElement,
-  onScreenClick,
-  screen,
-}) => {
-  const [draggingElement, setDraggingElement] = React.useState<IScreenElement>(
-    null,
-  );
-  const [resizingElement, setResizingElement] = React.useState<IScreenElement>(
-    null,
-  );
-  const [lastPosition, setPosition] = React.useState<IVector>(null);
-  const [editingElementSize, setEditingElementSize] = React.useState<IVector>(
-    null,
-  );
+export class Screen extends React.Component<IScreenProps> {
+  state: IScreenState = {
+    draggingElement: null,
+    editingElementSize: null,
+    resizingElement: null,
+  };
+  lastMousePosition: IVector = { x: 0, y: 0 };
+  canvas: HTMLCanvasElement = null;
 
-  const rotateElement = React.useCallback(
-    (event: React.WheelEvent, element: IScreenElement) => {
-      const angle = 5 * (event.deltaY < 0 ? 1 : -1);
-      const rotation = (element.rotation + angle) % 360;
+  onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const { onChangeElement } = this.props;
+    const { draggingElement, editingElementSize, resizingElement } = this.state;
+    const mousePosition = getMousePosition(event);
+    const diff = vectorsMinus(mousePosition, this.lastMousePosition);
 
-      onChangeElement({ ...element, rotation });
-    },
-    [],
-  );
+    if (draggingElement) {
+      const position = { ...draggingElement.position };
 
-  const startEdit = React.useCallback(
-    (event: React.MouseEvent<HTMLDivElement>, element: IScreenElement) => {
-      const { offsetHeight, offsetWidth } = event.currentTarget;
+      position.x += (100 * diff.x) / editingElementSize.x;
+      position.y += (100 * diff.y) / editingElementSize.y;
 
-      if (event.button) {
-        event.stopPropagation();
-        event.preventDefault();
-        setResizingElement(element);
-      } else {
-        setDraggingElement(element);
-      }
+      onChangeElement({ ...draggingElement, position });
+    }
 
-      setEditingElementSize({ x: offsetWidth, y: offsetHeight });
-      setPosition(getMousePosition(event));
-    },
-    [],
-  );
+    if (resizingElement) {
+      const scale = { ...resizingElement.scale };
+      const isShift = event.shiftKey;
+      const maxDiff = Math.max(diff.x, diff.y);
 
-  const onMouseMove = React.useCallback(
-    event => {
-      const currentPosition = getMousePosition(event);
+      scale.x += (2 * (isShift ? maxDiff : diff.x)) / editingElementSize.x;
+      scale.y += (2 * (isShift ? maxDiff : diff.y)) / editingElementSize.y;
 
-      if (draggingElement) {
-        const position = { ...draggingElement.position };
+      onChangeElement({ ...resizingElement, scale });
+    }
 
-        position.x +=
-          (100 * (currentPosition.x - lastPosition.x)) / editingElementSize.x;
+    this.setMousePosition(mousePosition);
+  };
 
-        position.y +=
-          (100 * (currentPosition.y - lastPosition.y)) / editingElementSize.y;
+  rotateElement = (event: React.WheelEvent, element: IScreenElement) => {
+    const angle = 5 * (event.deltaY < 0 ? 1 : -1);
+    const rotation = (element.rotation + angle) % 360;
 
-        setPosition(currentPosition);
+    this.props.onChangeElement({ ...element, rotation });
+  };
 
-        onChangeElement({
-          ...draggingElement,
-          position,
-        });
-      } else if (resizingElement) {
-        const scale = { ...resizingElement.scale };
-        const isShift = event.shiftKey;
-        const diff = {
-          x: currentPosition.x - lastPosition.x,
-          y: currentPosition.y - lastPosition.y,
-        };
-        const maxDiff = Math.max(diff.x, diff.y);
+  setMousePosition = (position: IVector) => (this.lastMousePosition = position);
 
-        scale.x += (2 * isShift ? maxDiff : diff.x) / editingElementSize.x;
-        scale.y += (2 * isShift ? maxDiff : diff.y) / editingElementSize.y;
+  startEdit = (
+    event: React.MouseEvent<HTMLDivElement>,
+    element: IScreenElement,
+  ) => {
+    const { offsetHeight, offsetWidth } = event.currentTarget;
+    const isRightClick = !!event.button;
+    const editingElementSize = { x: offsetWidth, y: offsetHeight };
 
-        setPosition(currentPosition);
+    if (isRightClick) {
+      event.stopPropagation();
+      event.preventDefault();
+      this.setState({ resizingElement: element, editingElementSize });
+    } else {
+      this.setState({ draggingElement: element, editingElementSize });
+    }
 
-        onChangeElement({
-          ...resizingElement,
-          scale,
-        });
-      }
-    },
-    [draggingElement, onChangeElement, resizingElement],
-  );
+    this.setMousePosition(getMousePosition(event));
+  };
 
-  const stopDrag = React.useCallback(() => {
-    setDraggingElement(null);
-    setResizingElement(null);
-  }, []);
+  stopDrag = () =>
+    this.setState({ draggingElement: null, resizingElement: null });
 
-  return (
-    <div
-      className={cn(className, 'screenWrapper')}
-      onMouseUpCapture={() =>
-        !draggingElement && !resizingElement && onScreenClick()
-      }
-      onContextMenuCapture={event => event.preventDefault()}
-      ref={getRef}
-    >
+  render() {
+    const {
+      activeElementId,
+      animationTime,
+      className,
+      elements,
+      getRef,
+      onScreenClick,
+      screen,
+    } = this.props;
+
+    const { draggingElement, resizingElement } = this.state;
+
+    const screenStyle = {
+      transform: screen && getElementTransform(screen),
+      transitionDuration: `${animationTime}s`,
+    };
+
+    return (
       <div
-        className='screen'
-        onMouseMoveCapture={onMouseMove}
-        onMouseUpCapture={stopDrag}
-        style={{
-          transform: screen && getElementTransform(screen),
-          transitionDuration: `${animationTime}s`,
-        }}
+        className={cn(className, 'screenWrapper')}
+        onMouseUpCapture={() =>
+          !draggingElement && !resizingElement && onScreenClick()
+        }
+        onContextMenuCapture={event => event.preventDefault()}
+        ref={getRef}
       >
-        {elements.map(element => (
-          <div
-            className={cn('screenElement', {
-              'screenElement--active': activeElementId === element.id,
-            })}
-            key={element.id}
-            onContextMenuCapture={event => startEdit(event, element)}
-            onMouseDownCapture={event => startEdit(event, element)}
-            onWheel={event => rotateElement(event, element)}
-            style={{
-              height: `${element.height}%`,
-              left: `calc(50% - ${element.width / 2}%)`,
-              top: `calc(50% - ${element.height / 2}%)`,
-              transform: getElementTransform(element),
-              transitionDuration: `${animationTime}s`,
-              width: `${element.width}%`,
-            }}
-          >
-            {element.content}
-          </div>
-        ))}
+        <div
+          className='screen'
+          onMouseMoveCapture={this.onMouseMove}
+          onMouseUpCapture={this.stopDrag}
+          style={screenStyle}
+        >
+          {elements.map(element => (
+            <div
+              className={cn('screenElement', {
+                'screenElement--active': activeElementId === element.id,
+              })}
+              key={element.id}
+              onContextMenuCapture={event => this.startEdit(event, element)}
+              onMouseDownCapture={event => this.startEdit(event, element)}
+              onWheel={event => this.rotateElement(event, element)}
+              style={{
+                height: `${element.height}%`,
+                left: `calc(50% - ${element.width / 2}%)`,
+                top: `calc(50% - ${element.height / 2}%)`,
+                transform: getElementTransform(element),
+                transitionDuration: `${animationTime}s`,
+                width: `${element.width}%`,
+              }}
+            >
+              {element.content}
+            </div>
+          ))}
+        </div>
+
+        <canvas
+          height='100%'
+          ref={ref => (this.canvas = ref)}
+          style={screenStyle}
+          width='100%'
+        />
       </div>
-    </div>
-  );
-};
+    );
+  }
+}

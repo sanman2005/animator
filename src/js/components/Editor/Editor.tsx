@@ -340,6 +340,7 @@ class Editor extends React.Component<{}, IState> {
       activeSceneElementId,
       activeFrameIndex,
       frames,
+      playing,
       sceneElements,
       screenElementsByFrames,
     } = this.state;
@@ -348,7 +349,7 @@ class Editor extends React.Component<{}, IState> {
       <Content className='home' centerContent>
         <Screen
           activeElementId={activeSceneElementId}
-          animationTime={ANIMATION_FRAME_SECONDS}
+          animationTime={playing ? ANIMATION_FRAME_SECONDS : 0}
           elements={screenElementsByFrames[activeFrameIndex]}
           getRef={this.setScreen}
           onChangeElement={this.updateScreenElement}
