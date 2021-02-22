@@ -29,6 +29,7 @@ interface IState {
   frames: TFrame[];
   playing: boolean;
   recording: boolean;
+  recordResolution: IVector;
   sceneElements: IScreenElement[];
   screenElementsByFrames: IScreenElement[][];
 }
@@ -40,6 +41,7 @@ class Editor extends React.Component<{}, IState> {
     frames: [...Array(animationFramesCount)].map(() => ({})),
     playing: false,
     recording: false,
+    recordResolution: { x: 0, y: 0 },
     sceneElements: [],
     screenElementsByFrames: [...Array(animationFramesCount)].map(() => []),
   };
@@ -298,15 +300,19 @@ class Editor extends React.Component<{}, IState> {
     this.updateScene({ frames, sceneElements });
   };
 
-  setScreen = (node: HTMLDivElement) => (this.screen = node);
+  setScreen = (node: HTMLDivElement) => {
+    const { height, width } = node.getBoundingClientRect();
+
+    this.setState({ recordResolution: { x: width, y: height } });
+    this.screen = node;
+  };
 
   setScreenshot = (context: CanvasRenderingContext2D) =>
-    // this.gifEncoder.addFrame(context);
-    console.log(1);
+    this.gifEncoder.addFrame(context);
 
   onRecord = async () => {
-    const { height, width } = this.screen.getBoundingClientRect();
-    const gifEncoder = new GIFEncoder(width, height);
+    const { recordResolution } = this.state;
+    const gifEncoder = new GIFEncoder(recordResolution.x, recordResolution.y);
     // @ts-ignore
     const file = await window.showSaveFilePicker({
       types: [
@@ -342,6 +348,8 @@ class Editor extends React.Component<{}, IState> {
       activeFrameIndex,
       frames,
       playing,
+      recording,
+      recordResolution,
       sceneElements,
       screenElementsByFrames,
     } = this.state;
@@ -354,8 +362,10 @@ class Editor extends React.Component<{}, IState> {
           elements={screenElementsByFrames[activeFrameIndex]}
           getRef={this.setScreen}
           onChangeElement={this.updateScreenElement}
-          onDrawCanvas={this.setScreenshot}
+          onDrawCanvas={recording ? this.setScreenshot : null}
           onScreenClick={this.deactivateScreenElement}
+          record={recording}
+          recordResolution={recordResolution}
         />
 
         <Toolbox items={this.templatesByCategory} position='left' />

@@ -29,6 +29,7 @@ interface IScreenProps {
   onChangeElement?: (element: IScreenElement) => void;
   onScreenClick?: () => void;
   record?: boolean;
+  recordResolution?: IVector;
   screen?: IElement;
 }
 
@@ -61,7 +62,8 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
     const context = canvas.getContext('2d');
     let waitImagesCount = elements.length;
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
     elements.forEach(
       ({ height, idTemplate, rotation, position, scale, width }) => {
@@ -69,16 +71,25 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
         const koef = 0.01;
         const scaledWidth = canvas.width * width * koef * scale.x;
         const scaledHeight = canvas.height * height * koef * scale.y;
-        const x =
-          canvas.width * (0.5 + width * position.x * koef * koef) -
-          scaledWidth * 0.5;
-        const y =
-          canvas.height * (0.5 + height * position.y * koef * koef) -
-          scaledHeight * 0.5;
+        const x = canvas.width * (0.5 + width * position.x * koef * koef);
+        const y = canvas.height * (0.5 + height * position.y * koef * koef);
+        const angle = (Math.PI / 180) * rotation;
 
         image.onload = () => {
-          // context.rotate((Math.PI / 180) * 25);
-          context.drawImage(image, x, y, scaledWidth, scaledHeight);
+          context.translate(x, y);
+          context.rotate(angle);
+
+          context.drawImage(
+            image,
+            -scaledWidth * 0.5,
+            -scaledHeight * 0.5,
+            scaledWidth,
+            scaledHeight,
+          );
+
+          context.rotate(-angle);
+          context.translate(-x, -y);
+
           waitImagesCount--;
 
           if (!waitImagesCount) onDrawCanvas(context);
@@ -170,6 +181,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
       getRef,
       onScreenClick,
       record,
+      recordResolution,
       screen,
     } = this.props;
 
@@ -180,7 +192,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
       transitionDuration: `${animationTime}s`,
     };
 
-    record || this.draw(); // TODO: replace with &&
+    record && this.draw();
 
     return (
       <div
@@ -220,11 +232,12 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
           ))}
         </div>
 
-        {record || ( // TODO: replace with &&
+        {record && (
           <canvas
             className='screenCanvas'
+            height={recordResolution?.y}
             ref={ref => (this.canvas = ref)}
-            style={screenStyle}
+            width={recordResolution?.x}
           />
         )}
       </div>
