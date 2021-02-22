@@ -1,7 +1,7 @@
 import * as React from 'react';
 import cn from 'classnames';
 
-import { getMousePosition, vectorsMinus } from 'js/helpers';
+import { getMousePosition, vectorsMinus, vectorsPlus } from 'js/helpers';
 
 import 'js/types.d.ts';
 
@@ -42,7 +42,7 @@ const getElementTransform = (element: IElement) =>
   `rotateZ(${element.rotation}deg) ` +
   `scale(${element.scale.x}, ${element.scale.y}) `;
 
-export class Screen extends React.Component<IScreenProps> {
+export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
   state: IScreenState = {
     draggingElement: null,
     editingElementSize: null,
@@ -63,18 +63,30 @@ export class Screen extends React.Component<IScreenProps> {
       position.x += (100 * diff.x) / editingElementSize.x;
       position.y += (100 * diff.y) / editingElementSize.y;
 
-      onChangeElement({ ...draggingElement, position });
+      const newElement = { ...draggingElement, position };
+
+      onChangeElement(newElement);
+      this.setState({ draggingElement: newElement });
     }
 
     if (resizingElement) {
       const scale = { ...resizingElement.scale };
       const isShift = event.shiftKey;
-      const maxDiff = Math.max(diff.x, diff.y);
+      const isShiftX = Math.abs(diff.x) > Math.abs(diff.y);
+      const koefXY = isShift && editingElementSize.x / editingElementSize.y;
 
-      scale.x += (2 * (isShift ? maxDiff : diff.x)) / editingElementSize.x;
-      scale.y += (2 * (isShift ? maxDiff : diff.y)) / editingElementSize.y;
+      scale.x +=
+        (2 * (isShift && !isShiftX ? diff.y * koefXY : diff.x)) /
+        editingElementSize.x;
 
-      onChangeElement({ ...resizingElement, scale });
+      scale.y +=
+        (2 * (isShift && isShiftX ? diff.x / koefXY : diff.y)) /
+        editingElementSize.y;
+
+      const newElement = { ...resizingElement, scale };
+
+      onChangeElement(newElement);
+      this.setState({ resizingElement: newElement });
     }
 
     this.setMousePosition(mousePosition);
