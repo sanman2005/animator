@@ -179,14 +179,12 @@ class Editor extends React.Component<{}, IEditorState> {
 
   addElementToFrame = (id: string, frameIndex: number) => {
     const { frames, sceneElements, screenElementsByFrames } = this.state;
-    const newFrames = [...frames];
     const activeFrame = screenElementsByFrames[frameIndex];
     const byId = (element: IScreenElement) => element.id === id;
+    const element = { ...(activeFrame.find(byId) || sceneElements.find(byId)) };
+    const newFrames = [...frames];
 
-    newFrames[frameIndex] = {
-      ...newFrames[frameIndex],
-      [id]: activeFrame.find(byId) || sceneElements.find(byId),
-    };
+    newFrames[frameIndex] = { ...newFrames[frameIndex], [id]: element };
 
     this.updateScene({ frames: newFrames });
   };

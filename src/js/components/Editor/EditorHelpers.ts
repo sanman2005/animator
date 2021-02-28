@@ -30,12 +30,15 @@ export const interpolateElementsStates = (
     );
     const stepRotation = (stateNext.rotation - statePrev.rotation) * stepKoef;
 
-    for (let i = frameIndexFrom; i < frameIndexTo; i++) {
+    for (let i = frameIndexFrom, step = 0; i < frameIndexTo; i++, step++) {
       elementsByFrames[i].push({
         ...statePrev,
-        position: vectorsPlus(statePrev.position, vectorMulti(stepPosition, i)),
-        scale: vectorsPlus(statePrev.scale, vectorMulti(stepScale, i)),
-        rotation: statePrev.rotation + stepRotation * i,
+        position: vectorsPlus(
+          statePrev.position,
+          vectorMulti(stepPosition, step),
+        ),
+        scale: vectorsPlus(statePrev.scale, vectorMulti(stepScale, step)),
+        rotation: statePrev.rotation + stepRotation * step,
       });
     }
   };
