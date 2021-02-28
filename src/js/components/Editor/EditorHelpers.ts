@@ -1,4 +1,4 @@
-import { vectorMulti, vectorsPlus } from '../../helpers';
+import { vectorsMinus, vectorMulti, vectorsPlus } from '../../helpers';
 
 import { IScreenElement } from 'components/Screen';
 import { TFrame } from 'components/Timeline';
@@ -7,26 +7,28 @@ export const interpolateElementsStates = (
   elements: IScreenElement[],
   frames: TFrame[],
 ) => {
-  const elementsByFrames = frames.map(() => []);
+  const elementsByFrames: IScreenElement[][] = frames.map(() => []);
 
   const interpolateState = (
     elementId: string,
     frameIndexFrom: number,
     frameIndexTo: number,
-  ) => { // интерполяция промежуточных состояний
+  ) => {
+    // интерполяция промежуточных состояний
     const statePrev = frames[frameIndexFrom][elementId];
-    const stateNext = frames[frameIndexTo][elementId] || statePrev;
-    const stepsCount = frameIndexTo - frameIndexFrom;
+    const stateNext =
+      (frames[frameIndexTo] && frames[frameIndexTo][elementId]) || statePrev;
+    const stepKoef = 1 / (frameIndexTo - frameIndexFrom);
 
-    const stepPosition = {
-      x: (stateNext.position.x - statePrev.position.x) / stepsCount,
-      y: (stateNext.position.y - statePrev.position.y) / stepsCount,
-    };
-    const stepScale = {
-      x: (stateNext.scale.x - statePrev.scale.x) / stepsCount,
-      y: (stateNext.scale.y - statePrev.scale.y) / stepsCount,
-    };
-    const stepRotation = (stateNext.rotation - statePrev.rotation) / stepsCount;
+    const stepPosition = vectorMulti(
+      vectorsMinus(stateNext.position, statePrev.position),
+      stepKoef,
+    );
+    const stepScale = vectorMulti(
+      vectorsMinus(stateNext.scale, statePrev.scale),
+      stepKoef,
+    );
+    const stepRotation = (stateNext.rotation - statePrev.rotation) * stepKoef;
 
     for (let i = frameIndexFrom; i < frameIndexTo; i++) {
       elementsByFrames[i].push({
@@ -38,11 +40,13 @@ export const interpolateElementsStates = (
     }
   };
 
-  elements.forEach(({ id }) => { // для каждого элемента
+  elements.forEach(({ id }) => {
+    // для каждого элемента
     let statePrevFrameIndex: number = null;
 
     frames.forEach((frame, frameIndex) => {
-      if (frame[id]) { // идем по кадрам
+      if (frame[id]) {
+        // идем по кадрам
         if (statePrevFrameIndex !== null) {
           interpolateState(id, statePrevFrameIndex, frameIndex);
         }
@@ -54,8 +58,9 @@ export const interpolateElementsStates = (
     if (
       statePrevFrameIndex !== null &&
       statePrevFrameIndex < frames.length - 1
-    ) { // и интерполируем состояние на промежуточные кадры
-      interpolateState(id, statePrevFrameIndex, frames.length - 1);
+    ) {
+      // и интерполируем состояние на промежуточные кадры
+      interpolateState(id, statePrevFrameIndex, frames.length);
     }
   });
 

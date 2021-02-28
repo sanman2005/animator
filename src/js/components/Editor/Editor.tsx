@@ -22,7 +22,7 @@ const STORAGE_SCENE_KEY = 'scene';
 
 const animationFramesCount = ANIMATION_SECONDS / ANIMATION_FRAME_SECONDS;
 
-interface IState {
+interface IEditorState {
   activeSceneElementId: string;
   activeFrameIndex: number;
   frames: TFrame[];
@@ -33,8 +33,8 @@ interface IState {
   screenElementsByFrames: IScreenElement[][];
 }
 
-class Editor extends React.Component<{}, IState> {
-  state: IState = {
+class Editor extends React.Component<{}, IEditorState> {
+  state: IEditorState = {
     activeSceneElementId: null,
     activeFrameIndex: 0,
     frames: [...Array(animationFramesCount)].map(() => ({})),
@@ -77,8 +77,8 @@ class Editor extends React.Component<{}, IState> {
     document.removeEventListener('keydown', this.onKeyDown);
   }
 
-  updateScene = (state: Partial<IState>) =>
-    this.setState(state as IState, this.calculateScreenElements);
+  updateScene = (state: Partial<IEditorState>) =>
+    this.setState(state as IEditorState, this.calculateScreenElements);
 
   onKeyDown = (event: KeyboardEvent) => {
     const handlers: { [key: string]: (event: KeyboardEvent) => void } = {
@@ -140,26 +140,24 @@ class Editor extends React.Component<{}, IState> {
   addScreenElement = (element: IScreenElement) => {
     const { activeFrameIndex, sceneElements } = this.state;
 
-    this.addElementToFrame(element, activeFrameIndex);
-    this.setState({
-      sceneElements: [...sceneElements, element],
-    });
+    this.setState({ sceneElements: [...sceneElements, element] }, () =>
+      this.addElementToFrame(element.id, activeFrameIndex),
+    );
   };
 
   updateScreenElement = (element: IScreenElement) => {
-    const { activeFrameIndex, frames, sceneElements } = this.state;
+    const { activeFrameIndex, frames } = this.state;
     const { id } = element;
-    const index = sceneElements.findIndex(item => item.id === id);
-    const newSceneElements = [...sceneElements];
     const newFrames = [...frames];
 
-    newSceneElements[index] = element;
-    newFrames[activeFrameIndex][id] = element;
+    newFrames[activeFrameIndex] = {
+      ...frames[activeFrameIndex],
+      [id]: element,
+    };
 
     this.updateScene({
       activeSceneElementId: id,
       frames: newFrames,
-      sceneElements: newSceneElements,
     });
   };
 
@@ -167,37 +165,28 @@ class Editor extends React.Component<{}, IState> {
 
   onFrameClick = (index: number) => this.setState({ activeFrameIndex: index });
 
-  onFrameRightClick = (index: number) => {
-    const {
-      activeSceneElementId,
-      activeFrameIndex,
-      frames,
-      sceneElements,
-    } = this.state;
+  onFrameRightClick = (frameIndex: number) => {
+    const { activeSceneElementId, frames } = this.state;
 
-    if (activeSceneElementId) {
-      const frameHasActiveElement = !!frames[activeFrameIndex][
-        activeSceneElementId
-      ];
+    if (!activeSceneElementId) return;
 
-      if (frameHasActiveElement) {
-        this.removeElementFromFrame(activeSceneElementId, activeFrameIndex);
-      } else {
-        const activeElement = sceneElements.find(
-          element => element.id === activeSceneElementId,
-        );
-
-        this.addElementToFrame(activeElement, activeFrameIndex);
-      }
+    if (frames[frameIndex][activeSceneElementId]) {
+      this.removeElementFromFrame(activeSceneElementId, frameIndex);
+    } else {
+      this.addElementToFrame(activeSceneElementId, frameIndex);
     }
-
-    this.setState({ activeFrameIndex: index });
   };
 
-  addElementToFrame = (element: IScreenElement, frameIndex: number) => {
-    const newFrames = [...this.state.frames];
+  addElementToFrame = (id: string, frameIndex: number) => {
+    const { frames, sceneElements, screenElementsByFrames } = this.state;
+    const newFrames = [...frames];
+    const activeFrame = screenElementsByFrames[frameIndex];
+    const byId = (element: IScreenElement) => element.id === id;
 
-    newFrames[frameIndex][element.id] = element;
+    newFrames[frameIndex] = {
+      ...newFrames[frameIndex],
+      [id]: activeFrame.find(byId) || sceneElements.find(byId),
+    };
 
     this.updateScene({ frames: newFrames });
   };
@@ -284,7 +273,7 @@ class Editor extends React.Component<{}, IState> {
 
     if (!data) return;
 
-    const { frames, sceneElements } = JSON.parse(data) as IState;
+    const { frames, sceneElements } = JSON.parse(data) as IEditorState;
 
     sceneElements.forEach(element => {
       const { id, idTemplate } = element;
