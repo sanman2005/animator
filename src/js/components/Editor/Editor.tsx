@@ -5,7 +5,7 @@ import * as GIFEncoder from 'gifencoder';
 import { Category } from 'components/Category';
 import { Element } from 'components/Element';
 import { Content } from 'components/Grid';
-import { IScreenElement, Screen } from 'components/Screen';
+import { Screen } from 'components/Screen';
 import { TFrame, Timeline } from 'components/Timeline';
 import { Toolbox } from 'components/Toolbox';
 
@@ -13,7 +13,7 @@ import Elements from 'js/elements';
 
 import { interpolateElementsStates } from './EditorHelpers';
 
-import 'js/types.d.ts';
+import { ISceneElement, IVector } from 'js/types';
 
 const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
@@ -23,17 +23,17 @@ const STORAGE_SCENE_KEY = 'scene';
 const animationFramesCount = ANIMATION_SECONDS / ANIMATION_FRAME_SECONDS;
 
 interface IEditorState {
-  activeSceneElementId: string;
-  activeFrameIndex: number;
-  frames: TFrame[];
-  playing: boolean;
-  recording: boolean;
-  recordResolution: IVector;
-  sceneElements: IScreenElement[];
-  screenElementsByFrames: IScreenElement[][];
+  activeSceneElementId?: string;
+  activeFrameIndex?: number;
+  frames?: TFrame[];
+  playing?: boolean;
+  recording?: boolean;
+  recordResolution?: IVector;
+  sceneElements?: ISceneElement[];
+  screenElementsByFrames?: ISceneElement[][];
 }
 
-class Editor extends React.Component<{}, IEditorState> {
+class Editor extends React.PureComponent<{}, IEditorState> {
   state: IEditorState = {
     activeSceneElementId: null,
     activeFrameIndex: 0,
@@ -78,7 +78,7 @@ class Editor extends React.Component<{}, IEditorState> {
   }
 
   updateScene = (state: Partial<IEditorState>) =>
-    this.setState(state as IEditorState, this.calculateScreenElements);
+    this.setState(state, this.calculateScreenElements);
 
   onKeyDown = (event: KeyboardEvent) => {
     const handlers: { [key: string]: (event: KeyboardEvent) => void } = {
@@ -91,7 +91,7 @@ class Editor extends React.Component<{}, IEditorState> {
 
   onToolboxItemClick = (templateId: string) => {
     const id = uuidv();
-    const screenElement: IScreenElement = {
+    const screenElement: ISceneElement = {
       id,
       idTemplate: templateId,
       height: 10,
@@ -137,7 +137,7 @@ class Editor extends React.Component<{}, IEditorState> {
     });
   };
 
-  addScreenElement = (element: IScreenElement) => {
+  addScreenElement = (element: ISceneElement) => {
     const { activeFrameIndex, sceneElements } = this.state;
 
     this.setState({ sceneElements: [...sceneElements, element] }, () =>
@@ -145,7 +145,7 @@ class Editor extends React.Component<{}, IEditorState> {
     );
   };
 
-  updateScreenElement = (element: IScreenElement) => {
+  updateScreenElement = (element: ISceneElement) => {
     const { activeFrameIndex, frames } = this.state;
     const { id } = element;
     const newFrames = [...frames];
@@ -180,7 +180,7 @@ class Editor extends React.Component<{}, IEditorState> {
   addElementToFrame = (id: string, frameIndex: number) => {
     const { frames, sceneElements, screenElementsByFrames } = this.state;
     const activeFrame = screenElementsByFrames[frameIndex];
-    const byId = (element: IScreenElement) => element.id === id;
+    const byId = (element: ISceneElement) => element.id === id;
     const element = { ...(activeFrame.find(byId) || sceneElements.find(byId)) };
     const newFrames = [...frames];
 
@@ -308,6 +308,7 @@ class Editor extends React.Component<{}, IEditorState> {
         },
       ],
     });
+    // @ts-ignore
     const stream = await file.createWritable();
 
     stream.on = () => {};

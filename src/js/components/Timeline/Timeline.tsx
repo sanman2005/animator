@@ -2,11 +2,12 @@ import * as React from 'react';
 import cn from 'classnames';
 
 import Button from '../Button';
-import { IScreenElement } from '../Screen';
 
 import Icons from '../icons';
 
-export type TFrame = { [key: string]: IScreenElement };
+import { ISceneElement } from 'js/types';
+
+export type TFrame = { [key: string]: ISceneElement };
 
 interface ITimelineProps {
   activeElementId: string;

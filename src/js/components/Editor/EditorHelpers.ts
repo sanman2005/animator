@@ -1,13 +1,14 @@
 import { vectorsMinus, vectorMulti, vectorsPlus } from '../../helpers';
 
-import { IScreenElement } from 'components/Screen';
 import { TFrame } from 'components/Timeline';
 
+import { ISceneElement } from 'js/types';
+
 export const interpolateElementsStates = (
-  elements: IScreenElement[],
+  elements: ISceneElement[],
   frames: TFrame[],
 ) => {
-  const elementsByFrames: IScreenElement[][] = frames.map(() => []);
+  const elementsByFrames: ISceneElement[][] = frames.map(() => []);
 
   const interpolateState = (
     elementId: string,

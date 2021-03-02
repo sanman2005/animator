@@ -1,32 +1,18 @@
-import * as React from 'react';
+import React from 'react';
 import cn from 'classnames';
 
-import { getMousePosition, vectorsMinus, vectorsPlus } from 'js/helpers';
+import { getMousePosition, vectorsMinus } from 'js/helpers';
 
-import 'js/types.d.ts';
-
-export interface IElement {
-  position: IVector;
-  rotation: number;
-  scale: IVector;
-}
-
-export interface IScreenElement extends IElement {
-  id: string;
-  idTemplate: string;
-  content: React.ReactNode;
-  height: number;
-  width: number;
-}
+import { IElement, ISceneElement, IVector } from 'js/types';
 
 interface IScreenProps {
   activeElementId?: string;
   animationTime: number;
   className?: string;
-  elements: IScreenElement[];
+  elements: ISceneElement[];
   getRef?: (ref: HTMLElement) => void;
   onDrawCanvas?: (context: CanvasRenderingContext2D) => void;
-  onChangeElement?: (element: IScreenElement) => void;
+  onChangeElement?: (element: ISceneElement) => void;
   onScreenClick?: () => void;
   record?: boolean;
   recordResolution?: IVector;
@@ -34,9 +20,9 @@ interface IScreenProps {
 }
 
 interface IScreenState {
-  draggingElement: IScreenElement;
-  editingElementSize: IVector;
-  resizingElement: IScreenElement;
+  draggingElement?: ISceneElement;
+  editingElementSize?: IVector;
+  resizingElement?: ISceneElement;
 }
 
 const getElementTransform = (element: IElement) =>
@@ -149,7 +135,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
     this.setMousePosition(mousePosition);
   };
 
-  rotateElement = (event: React.WheelEvent, element: IScreenElement) => {
+  rotateElement = (event: React.WheelEvent, element: ISceneElement) => {
     const angle = 5 * (event.deltaY < 0 ? 1 : -1);
     const rotation = (element.rotation + angle) % 360;
 
@@ -160,7 +146,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
 
   startEdit = (
     event: React.MouseEvent<HTMLDivElement>,
-    element: IScreenElement,
+    element: ISceneElement,
   ) => {
     const { offsetHeight, offsetWidth } = event.currentTarget;
     const isRightClick = !!event.button;

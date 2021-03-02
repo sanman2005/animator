@@ -8,7 +8,6 @@
     "moduleResolution": "Node",
     "noImplicitAny": true,
     "paths": {
-      "*": ["src/js/*"],
       "api/*": ["src/js/api/*"],
       "components/*": ["src/js/components/*"],
       "config/*": ["config/*"],

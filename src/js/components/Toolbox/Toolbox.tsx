@@ -3,7 +3,7 @@ import cn from 'classnames';
 
 import { getMousePosition } from 'js/helpers';
 
-import 'js/types.d.ts';
+import { IVector } from 'js/types';
 
 export interface IToolboxItem {
   id: string;
@@ -22,9 +22,9 @@ interface IToolboxProps {
 
 interface IToolboxState {
   draggingItemId?: string;
-  itemHalfSize: number;
-  offset: IVector;
-  startMousePosition: IVector;
+  itemHalfSize?: number;
+  offset?: IVector;
+  startMousePosition?: IVector;
 }
 
 export class Toolbox extends React.PureComponent<IToolboxProps, IToolboxState> {
