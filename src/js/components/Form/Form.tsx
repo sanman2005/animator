@@ -57,7 +57,7 @@ interface IFormState {
   validInputsLeft: number;
 }
 
-class Form extends React.Component<IFormProps, IFormState> {
+export default class Form extends React.Component<IFormProps, IFormState> {
   static displayName: 'Form';
 
   fields: TFields;
@@ -240,5 +240,3 @@ class Form extends React.Component<IFormProps, IFormState> {
     );
   }
 }
-
-export default Form;

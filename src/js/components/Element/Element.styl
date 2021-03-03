@@ -1,4 +1,5 @@
 .element
+  position relative
   display flex
   max-width 100px
   height 100%
@@ -12,3 +13,29 @@
     height 100%
     object-fit contain
     pointer-events none
+
+  &__edit
+    position absolute
+    display none
+    top 10%
+    right 10%
+    width 20%
+    height 20%
+    cursor pointer
+    z-index 1
+
+    svg
+      display block
+      width 100%
+      height auto
+
+      *
+        fill $colorBlue1
+
+    &:hover *
+      fill $colorBlue2
+
+
+    /.screenElement--active &
+    /.toolbox__item--active &
+        display block

@@ -224,6 +224,22 @@ export const InputText = React.forwardRef<TInput, IInputProps>(
   ),
 );
 
+export const InputNumber = React.forwardRef<TInput, IInputProps>(
+  (props: IInputProps, ref: TRef) => (
+    <Input
+      ref={ref}
+      maxLength={6}
+      pattern="^\d+$"
+      validationTexts={{
+        [Reasons.required]: 'Введите число',
+        [Reasons.pattern]: 'В числе могут быть только цифры',
+        [Reasons.maxLength]: 'Слишком длинное число',
+      }}
+      {...props}
+    />
+  ),
+);
+
 type TInputFileProps = {
   accept?: string;
   onInit?: (input: HTMLInputElement) => void;

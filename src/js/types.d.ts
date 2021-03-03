@@ -16,10 +16,16 @@ interface IElement {
   scale: IVector;
 }
 
-interface ISceneElement extends IElement {
+interface IEffect {
+  repeatX: number;
+  repeatY: number;
+}
+
+interface ISceneElement extends IElement, IEffect {
+  category: string;
+  content: React.ReactNode;
   id: string;
   idTemplate: string;
-  content: React.ReactNode;
   height: number;
   width: number;
 }

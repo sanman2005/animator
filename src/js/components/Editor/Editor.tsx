@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { v4 as uuidv } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import * as GIFEncoder from 'gifencoder';
 
 import { Category } from 'components/Category';
+import { EffectForm } from 'components/EffectForm';
 import { Element } from 'components/Element';
 import { Content } from 'components/Grid';
 import { Screen } from 'components/Screen';
@@ -13,7 +14,7 @@ import Elements from 'js/elements';
 
 import { interpolateElementsStates } from './EditorHelpers';
 
-import { ISceneElement, IVector } from 'js/types';
+import { IEffect, ISceneElement, IVector } from 'js/types';
 
 const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
@@ -26,6 +27,7 @@ interface IEditorState {
   activeSceneElementId?: string;
   activeFrameIndex?: number;
   frames?: TFrame[];
+  isElementEditing?: boolean;
   playing?: boolean;
   recording?: boolean;
   recordResolution?: IVector;
@@ -38,6 +40,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     activeSceneElementId: null,
     activeFrameIndex: 0,
     frames: [...Array(animationFramesCount)].map(() => ({})),
+    isElementEditing: false,
     playing: false,
     recording: false,
     recordResolution: { x: 0, y: 0 },
@@ -58,7 +61,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
           <Element
             image={id}
             key={id}
-            onClick={() => this.onToolboxItemClick(id)}
+            onClick={() => this.onToolboxItemClick(id, category)}
           />
         ))}
       >
@@ -89,27 +92,34 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     if (handlers[event.code]) handlers[event.code](event);
   };
 
-  onToolboxItemClick = (templateId: string) => {
-    const id = uuidv();
+  onToolboxItemClick = (templateId: string, category: string) => {
+    const id = uuid();
     const screenElement: ISceneElement = {
+      category,
+      content: this.renderElementContent(id, templateId, category),
       id,
       idTemplate: templateId,
       height: 10,
       width: 10,
       position: { x: 0, y: 0 },
       scale: { x: 1, y: 1 },
+      repeatX: 1,
+      repeatY: 1,
       rotation: 0,
-      content: this.renderElementContent(id, templateId),
     };
 
     this.addScreenElement(screenElement);
   };
 
-  renderElementContent = (id: string, templateId: string) => (
+  onEditElementStart = () => this.setState({ isElementEditing: true });
+  onEditElementEnd = () => this.setState({ isElementEditing: false });
+
+  renderElementContent = (id: string, templateId: string, category: string) => (
     <Element
       image={templateId}
       onClick={() => this.onScreenElementClick(id)}
       onClickRight={() => this.onScreenElementRightClick(id)}
+      onEdit={category === 'effects' && this.onEditElementStart}
     />
   );
 
@@ -159,6 +169,24 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       activeSceneElementId: id,
       frames: newFrames,
     });
+  };
+
+  updateActiveElement = (props: Partial<ISceneElement>) => {
+    const { activeSceneElementId, sceneElements } = this.state;
+    const newSceneElements = [...sceneElements];
+    const index = sceneElements.findIndex(
+      item => item.id === activeSceneElementId,
+    );
+
+    if (index < 0) return;
+
+    newSceneElements[index] = {
+      ...newSceneElements[index],
+      ...props,
+    };
+
+    this.updateScene({ sceneElements: newSceneElements });
+    this.onEditElementEnd();
   };
 
   deactivateScreenElement = () => this.setState({ activeSceneElementId: null });
@@ -248,7 +276,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
           );
         },
         recording ? 0 : ANIMATION_FRAME_SECONDS * 1000,
-      );
+      ) as NodeJS.Timeout;
     }
 
     this.setState({ playing: !playing });
@@ -274,9 +302,9 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     const { frames, sceneElements } = JSON.parse(data) as IEditorState;
 
     sceneElements.forEach(element => {
-      const { id, idTemplate } = element;
+      const { category, id, idTemplate } = element;
 
-      element.content = this.renderElementContent(id, idTemplate);
+      element.content = this.renderElementContent(id, idTemplate, category);
 
       frames.forEach(
         frame => frame[id] && (frame[id].content = element.content),
@@ -334,12 +362,18 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       activeSceneElementId,
       activeFrameIndex,
       frames,
+      isElementEditing,
       playing,
       recording,
       recordResolution,
       sceneElements,
       screenElementsByFrames,
     } = this.state;
+
+    const editingElement =
+      activeSceneElementId &&
+      isElementEditing &&
+      sceneElements.find(({ id }) => id === activeSceneElementId);
 
     return (
       <Content className='home' centerContent>
@@ -377,6 +411,15 @@ class Editor extends React.PureComponent<{}, IEditorState> {
             seconds={ANIMATION_SECONDS}
           />
         </Toolbox>
+
+        {editingElement && (
+          <EffectForm
+            onClose={this.onEditElementEnd}
+            onSubmit={this.updateActiveElement}
+            repeatX={editingElement.repeatX}
+            repeatY={editingElement.repeatY}
+          />
+        )}
       </Content>
     );
   }

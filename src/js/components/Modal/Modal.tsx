@@ -1,5 +1,5 @@
-import * as React from 'react';
-import * as ModalReact from 'react-modal';
+import React from 'react';
+import ModalReact from 'react-modal';
 import cn from 'classnames';
 
 import Icons from '../icons';
@@ -12,7 +12,7 @@ interface IModalProps {
   noPad?: boolean;
 }
 
-export default class Modal extends React.Component<IModalProps> {
+export default class Modal extends React.PureComponent<IModalProps> {
   componentDidMount() {
     scrollDisable();
   }
