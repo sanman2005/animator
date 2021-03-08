@@ -153,6 +153,8 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
     const editingElementSize = { x: offsetWidth, y: offsetHeight };
 
     if (isRightClick) {
+      if (event.type === 'contextmenu') return;
+
       event.stopPropagation();
       event.preventDefault();
       this.setState({ resizingElement: element, editingElementSize });

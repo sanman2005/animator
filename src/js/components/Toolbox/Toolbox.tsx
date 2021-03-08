@@ -126,6 +126,7 @@ export class Toolbox extends React.PureComponent<IToolboxProps, IToolboxState> {
             }
             onMouseMove={this.dragging}
             onMouseUp={this.stopDragging}
+            onContextMenu={event => event.preventDefault()}
             style={
               draggingItemId === item.id
                 ? { transform: `translate(${offset.x}px, ${offset.y}px)` }

@@ -14,7 +14,7 @@ import Elements from 'js/elements';
 
 import { interpolateElementsStates } from './EditorHelpers';
 
-import { IEffect, ISceneElement, IVector } from 'js/types';
+import { ISceneElement, IVector } from 'js/types';
 
 const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
