@@ -5,6 +5,7 @@ import { InputNumber } from 'components/Input';
 import Modal from 'components/Modal';
 
 interface IEffectFormResult {
+  animationSpeed: number;
   repeatX: number;
   repeatY: number;
 }
@@ -15,6 +16,7 @@ interface IEffectFormProps extends IEffectFormResult {
 }
 
 export const EffectForm: React.FC<IEffectFormProps> = ({
+  animationSpeed,
   onClose,
   onSubmit,
   repeatX,
@@ -39,9 +41,18 @@ export const EffectForm: React.FC<IEffectFormProps> = ({
             value={`${repeatY}`}
           />
         ),
+        animationSpeed: (
+          <InputNumber
+            label='Циклов в секунду'
+            name='speed'
+            required
+            value={`${animationSpeed}`}
+          />
+        ),
       }}
-      onSubmit={({ repeatX, repeatY }) =>
+      onSubmit={({ animationSpeed, repeatX, repeatY }) =>
         onSubmit({
+          animationSpeed: +animationSpeed,
           repeatX: +repeatX,
           repeatY: +repeatY,
         })

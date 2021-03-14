@@ -17,6 +17,7 @@ interface IElement {
 }
 
 interface IEffect {
+  animationSpeed: number;
   repeatX: number;
   repeatY: number;
 }

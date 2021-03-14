@@ -27,7 +27,7 @@ interface IInputProps extends IValidationProps {
   isSelect?: boolean;
 }
 
-interface StateType {
+interface IInputState {
   value: string;
 }
 
@@ -39,7 +39,7 @@ type TRefText = React.RefObject<HTMLTextAreaElement>;
 // tslint:disable:variable-name
 export const Input = React.forwardRef<TInput, IInputProps>(
   (props: IInputProps, ref: TRef) => {
-    class InputComponent extends ValidationComponent<IInputProps, StateType> {
+    class InputComponent extends ValidationComponent<IInputProps, IInputState> {
       onChange = (event: React.FormEvent<TInput>) => {
         const { value } = event.currentTarget;
         const { onChange, name } = this.props;

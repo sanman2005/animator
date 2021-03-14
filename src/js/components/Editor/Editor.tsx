@@ -19,6 +19,8 @@ import { ISceneElement, IVector } from 'js/types';
 const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
 
+const EFFECTS_CATEGORY = 'effects';
+
 const STORAGE_SCENE_KEY = 'scene';
 
 const animationFramesCount = ANIMATION_SECONDS / ANIMATION_FRAME_SECONDS;
@@ -94,7 +96,9 @@ class Editor extends React.PureComponent<{}, IEditorState> {
 
   onToolboxItemClick = (templateId: string, category: string) => {
     const id = uuid();
+    const isEffect = category === EFFECTS_CATEGORY;
     const screenElement: ISceneElement = {
+      animationSpeed: isEffect ? 1 : 0,
       category,
       content: this.renderElementContent(id, templateId, category),
       id,
@@ -119,7 +123,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       image={templateId}
       onClick={() => this.onScreenElementClick(id)}
       onClickRight={() => this.onScreenElementRightClick(id)}
-      onEdit={category === 'effects' && this.onEditElementStart}
+      onEdit={category === EFFECTS_CATEGORY && this.onEditElementStart}
     />
   );
 
@@ -414,6 +418,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
 
         {editingElement && (
           <EffectForm
+            animationSpeed={editingElement.animationSpeed}
             onClose={this.onEditElementEnd}
             onSubmit={this.updateActiveElement}
             repeatX={editingElement.repeatX}
