@@ -6,7 +6,7 @@ import { Category } from 'components/Category';
 import { EffectForm } from 'components/EffectForm';
 import { Element } from 'components/Element';
 import { Content } from 'components/Grid';
-import { Screen } from 'components/Screen';
+import { Screen, ScreenCanvas } from 'components/Screen';
 import { TFrame, Timeline } from 'components/Timeline';
 import { Toolbox } from 'components/Toolbox';
 
@@ -397,11 +397,16 @@ class Editor extends React.PureComponent<{}, IEditorState> {
           elements={screenElementsByFrames[activeFrameIndex]}
           getRef={this.setScreen}
           onChangeElement={this.updateScreenElement}
-          onDrawCanvas={this.setScreenshot}
           onScreenClick={this.deactivateScreenElement}
-          record={recording}
-          recordResolution={recordResolution}
-        />
+        >
+          {recording && (
+            <ScreenCanvas
+              elements={screenElementsByFrames[activeFrameIndex]}
+              onDraw={this.setScreenshot}
+              resolution={recordResolution}
+            />
+          )}
+        </Screen>
 
         <Toolbox items={this.templatesByCategory} position='left' />
 
