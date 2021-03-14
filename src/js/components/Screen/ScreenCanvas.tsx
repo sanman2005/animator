@@ -8,7 +8,7 @@ interface IScreenCanvasProps {
   resolution?: IVector;
 }
 
-export default class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
+class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
   canvas: HTMLCanvasElement = null;
 
   draw = () => {
@@ -55,30 +55,22 @@ export default class ScreenCanvas extends React.PureComponent<IScreenCanvasProps
           context.translate(x, y);
           context.rotate(angle);
 
-          const canvasOffscreen = isEffect
+          const source = isEffect
             ? new OffscreenCanvas(image.width * repeatX, image.height * repeatY)
-            : null;
+            : image;
 
           if (isEffect) {
-            const contextOffscreen = canvasOffscreen.getContext('2d');
+            const sourceCtx = (source as OffscreenCanvas).getContext('2d');
             const offset = Math.random() * image.height;
 
-            contextOffscreen.translate(0, offset);
-            contextOffscreen.fillStyle = contextOffscreen.createPattern(
-              image,
-              'repeat',
-            );
-            contextOffscreen.fillRect(
-              0,
-              0,
-              canvasOffscreen.width,
-              canvasOffscreen.height,
-            );
-            contextOffscreen.translate(0, -offset);
+            sourceCtx.translate(0, offset);
+            sourceCtx.fillStyle = sourceCtx.createPattern(image, 'repeat');
+            sourceCtx.fillRect(0, 0, source.width, source.height);
+            sourceCtx.translate(0, -offset);
           }
 
           context.drawImage(
-            isEffect ? canvasOffscreen : image,
+            source,
             -scaledWidth * 0.5,
             -scaledHeight * 0.5,
             scaledWidth,
@@ -113,3 +105,5 @@ export default class ScreenCanvas extends React.PureComponent<IScreenCanvasProps
     );
   }
 }
+
+export default ScreenCanvas;
