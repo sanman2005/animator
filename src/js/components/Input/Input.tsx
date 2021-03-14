@@ -229,10 +229,10 @@ export const InputNumber = React.forwardRef<TInput, IInputProps>(
     <Input
       ref={ref}
       maxLength={6}
-      pattern="^\d+$"
+      pattern="^\d+(\.\d+)?$"
       validationTexts={{
         [Reasons.required]: 'Введите число',
-        [Reasons.pattern]: 'В числе могут быть только цифры',
+        [Reasons.pattern]: 'Это не число',
         [Reasons.maxLength]: 'Слишком длинное число',
       }}
       {...props}

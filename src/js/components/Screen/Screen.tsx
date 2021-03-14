@@ -168,9 +168,47 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
   stopDrag = () =>
     this.setState({ draggingElement: null, resizingElement: null });
 
+  renderElement = (element: ISceneElement) => {
+    const { activeElementId, animationTime } = this.props;
+    const isEffect = element.repeatX !== 1 || element.repeatY !== 1;
+
+    return (
+      <div
+        className={cn('screenElement', {
+          'screenElement--active': activeElementId === element.id,
+          'screenElement--effect': isEffect,
+        })}
+        key={element.id}
+        onContextMenuCapture={event => this.startEdit(event, element)}
+        onMouseDownCapture={event => this.startEdit(event, element)}
+        onWheel={event => this.rotateElement(event, element)}
+        style={{
+          height: `${element.height}%`,
+          left: `calc(${50 - element.width / 2}%)`,
+          top: `calc(${50 - element.height / 2}%)`,
+          transform: getElementTransform(element),
+          transitionDuration: `${animationTime}s`,
+          width: `${element.width}%`,
+        }}
+      >
+        {element.content}
+        <div
+          className='screenElement__image'
+          style={{
+            animationDuration: `${isEffect ? 1 / element.animationSpeed : 0}s`,
+            backgroundImage: `url(${element.idTemplate})`,
+            backgroundRepeat: isEffect ? 'repeat' : 'no-repeat',
+            backgroundSize: isEffect
+              ? `${100 / element.repeatX}% ${100 / element.repeatY}%`
+              : 'contain',
+          }}
+        />
+      </div>
+    );
+  }
+
   render() {
     const {
-      activeElementId,
       animationTime,
       className,
       elements,
@@ -213,27 +251,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
             onMouseUpCapture={this.stopDrag}
             style={screenStyle}
           >
-            {elements.map(element => (
-              <div
-                className={cn('screenElement', {
-                  'screenElement--active': activeElementId === element.id,
-                })}
-                key={element.id}
-                onContextMenuCapture={event => this.startEdit(event, element)}
-                onMouseDownCapture={event => this.startEdit(event, element)}
-                onWheel={event => this.rotateElement(event, element)}
-                style={{
-                  height: `${element.height}%`,
-                  left: `calc(${50 - element.width / 2}%)`,
-                  top: `calc(${50 - element.height / 2}%)`,
-                  transform: getElementTransform(element),
-                  transitionDuration: `${animationTime}s`,
-                  width: `${element.width}%`,
-                }}
-              >
-                {element.content}
-              </div>
-            ))}
+            {elements.map(this.renderElement)}
           </div>
         )}
       </div>

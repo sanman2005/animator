@@ -176,7 +176,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   };
 
   updateActiveElement = (props: Partial<ISceneElement>) => {
-    const { activeSceneElementId, sceneElements } = this.state;
+    const { activeSceneElementId, frames, sceneElements } = this.state;
     const newSceneElements = [...sceneElements];
     const index = sceneElements.findIndex(
       item => item.id === activeSceneElementId,
@@ -189,7 +189,17 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       ...props,
     };
 
-    this.updateScene({ sceneElements: newSceneElements });
+    const newFrames: TFrame[] = frames.map(frame => ({
+      ...frame,
+      ...(frame[activeSceneElementId] && {
+        [activeSceneElementId]: {
+          ...frame[activeSceneElementId],
+          ...props,
+        },
+      }),
+    }));
+
+    this.updateScene({ frames: newFrames, sceneElements: newSceneElements });
     this.onEditElementEnd();
   };
 

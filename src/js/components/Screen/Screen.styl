@@ -38,3 +38,23 @@ $height = 768px
 
   > *
     padding 0
+
+  &__image
+    position absolute
+    fullSize()
+    background-position center
+    z-index 2
+
+  &--active &__image
+    animation animate-back linear infinite
+
+  &--effect
+    img
+      display none
+
+@keyframes animate-back
+  0%
+    background-position 0 0
+
+  100%
+    background-position 0 100%
