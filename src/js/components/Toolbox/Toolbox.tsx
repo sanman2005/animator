@@ -3,7 +3,7 @@ import cn from 'classnames';
 
 import { getMousePosition } from 'js/helpers';
 
-import { IVector } from 'js/types';
+import { IVector } from 'types';
 
 export interface IToolboxItem {
   id: string;

@@ -1,14 +1,14 @@
-import * as React from 'react';
-import * as enhanceWithClickOutside from 'react-click-outside';
+import React from 'react';
+import cn from 'classnames';
+import withClickOutside from 'react-click-outside';
 
+import Icons from '../icons';
+import { Input } from '../Input';
 import {
   ValidationComponent,
   IValidationProps,
   IValidationState,
 } from '../Validation';
-import Input from '../Input';
-import cn from 'classnames';
-import Icons from '../icons';
 
 interface ISelectItem {
   key: string;
@@ -21,7 +21,7 @@ interface ISelectProps extends IValidationProps {
   items: ISelectItem[];
   multi?: boolean;
   ref?: (input: any) => void;
-  onChange?: (value: string, name?: string) => void;
+  onChange?: (value: string | string[], name?: string) => void;
   value?: string | string[];
 }
 
@@ -71,7 +71,7 @@ class Select extends ValidationComponent<ISelectProps, ISelectState> {
   }
 
   toggle() {
-    this.setState({ isOpen: false });
+    this.setState({ isOpen: false } as ISelectState);
   }
 
   componentDidUpdate(
@@ -100,12 +100,10 @@ class Select extends ValidationComponent<ISelectProps, ISelectState> {
       items: this.renderItems(items, newValue),
       isOpen: !!multi,
       value: newValue,
-    });
+    } as ISelectState);
 
-    if (onChange) {
-      onChange(newValue, name);
-    }
-  }
+    onChange && onChange(newValue, name);
+  };
 
   renderItems = (items: ISelectItem[], value: string[]) => {
     const selectedTexts: string[] = [];
@@ -133,9 +131,10 @@ class Select extends ValidationComponent<ISelectProps, ISelectState> {
     this.selectedText = selectedTexts.join(', ');
 
     return renderedItems;
-  }
+  };
 
-  toggleItems = () => this.setState({ isOpen: !this.state.isOpen });
+  toggleItems = () =>
+    this.setState({ isOpen: !this.state.isOpen } as ISelectState);
 
   render() {
     const { className } = this.props;
@@ -157,11 +156,11 @@ class Select extends ValidationComponent<ISelectProps, ISelectState> {
             'select__triangle--opened': isOpen,
           })}
         >
-          <Icons.selectTriangle />
+          <Icons.triangle />
         </span>
       </div>
     );
   }
 }
 
-export default enhanceWithClickOutside(Select);
+export default withClickOutside(Select);

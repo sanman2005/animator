@@ -13,7 +13,8 @@
       "config/*": ["config/*"],
       "js/*": ["src/js/*"],
       "models/*": ["src/js/models/*"],
-      "pages/*": ["src/js/pages/*"]
+      "pages/*": ["src/js/pages/*"],
+      "types": ["src/js/types.d.ts"]
     },
     "removeComments": true,
     "resolveJsonModule": true,

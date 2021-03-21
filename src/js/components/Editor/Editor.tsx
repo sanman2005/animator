@@ -9,13 +9,15 @@ import { Content } from 'components/Grid';
 import { Screen, ScreenCanvas } from 'components/Screen';
 import { SpeechForm } from 'components/SpeechForm';
 import { TFrame, Timeline } from 'components/Timeline';
+import { Text } from 'components/Text';
 import { Toolbox } from 'components/Toolbox';
 
 import Elements from 'js/elements';
 
 import { interpolateElementsStates } from './EditorHelpers';
 
-import { ISceneElement, IVector } from 'js/types';
+import { ISceneElement, IVector } from 'types';
+import { ECorners } from 'js/constants';
 
 const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
@@ -135,7 +137,13 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       repeatX: 1,
       repeatY: 1,
       rotation: 0,
-      text: isSpeech ? 'Текст' : '',
+      speech: isSpeech
+        ? {
+            corner: ECorners.leftBottom,
+            text: 'Текст',
+            size: 10,
+          }
+        : null,
     };
 
     screenElement.content = this.renderElementContent(screenElement);
@@ -146,7 +154,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   onEditElementStart = () => this.setState({ isElementEditing: true });
   onEditElementEnd = () => this.setState({ isElementEditing: false });
 
-  renderElementContent = ({ category, id, image, text }: ISceneElement) => (
+  renderElementContent = ({ category, id, image, speech }: ISceneElement) => (
     <Element
       image={image}
       onClick={() => this.onScreenElementClick(id)}
@@ -156,7 +164,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
         this.onEditElementStart
       }
     >
-      {text && <div>{text}</div>}
+      {speech && <Text {...speech} />}
     </Element>
   );
 
@@ -222,12 +230,21 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       ...props,
     };
 
+    newSceneElements[index].content = this.renderElementContent(
+      newSceneElements[index],
+    );
+
+    const newProps = {
+      ...props,
+      content: newSceneElements[index].content,
+    };
+
     const newFrames: TFrame[] = frames.map(frame => ({
       ...frame,
       ...(frame[activeSceneElementId] && {
         [activeSceneElementId]: {
           ...frame[activeSceneElementId],
-          ...props,
+          ...newProps,
         },
       }),
     }));
@@ -478,9 +495,9 @@ class Editor extends React.PureComponent<{}, IEditorState> {
 
             {editingElement.category === SPEECH_CATEGORY && (
               <SpeechForm
+                {...editingElement.speech}
                 onClose={this.onEditElementEnd}
                 onSubmit={this.updateActiveElement}
-                text={editingElement.text}
               />
             )}
           </>

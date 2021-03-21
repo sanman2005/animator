@@ -25,8 +25,8 @@
 
   &__text
     position absolute
-    top 16px
-    left 16px
+    top 23px
+    left 25px
     pointer-events none
 
   .input
@@ -46,7 +46,7 @@
     font-size 14px
 
   &__items
-    position absolute
+    shadow($position: absolute)
     top calc(100% + 10px)
     left 0
     display block
@@ -55,9 +55,8 @@
     max-height 200px
     transition()
     scrollbar()
+    background-color $colorBackMain
     z-index 1
-    border none
-    border-radius $borderRadius
 
   &:not(&_opened) &__items
     padding 0
@@ -71,6 +70,9 @@
     &:hover
     &--selected
       font-weight bold
+
+    &--selected
+      color $colorBlue1
 
   .input__mark
     right 50px

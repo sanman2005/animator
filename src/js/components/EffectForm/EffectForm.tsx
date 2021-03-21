@@ -4,7 +4,7 @@ import Form from 'components/Form';
 import { InputNumber } from 'components/Input';
 import Modal from 'components/Modal';
 
-import { IEffect } from "js/types";
+import { IEffect } from 'js/types';
 
 interface IEffectFormProps extends IEffect {
   onClose: () => void;
@@ -24,7 +24,6 @@ export const EffectForm: React.FC<IEffectFormProps> = ({
         repeatX: (
           <InputNumber
             label='Повторить по горизонтали'
-            name='repeatX'
             required
             value={`${repeatX}`}
           />
@@ -32,7 +31,6 @@ export const EffectForm: React.FC<IEffectFormProps> = ({
         repeatY: (
           <InputNumber
             label='Повторить по вертикали'
-            name='repeatY'
             required
             value={`${repeatY}`}
           />
@@ -40,7 +38,6 @@ export const EffectForm: React.FC<IEffectFormProps> = ({
         animationSpeed: (
           <InputNumber
             label='Циклов в секунду'
-            name='speed'
             required
             value={`${animationSpeed}`}
           />

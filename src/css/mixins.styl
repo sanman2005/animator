@@ -55,8 +55,8 @@ shadowInset($size = 5px)
     box-shadow 1px 1px 2px $colorShadowDark, -1px -1px 2px $colorShadowLight
     pointer-events none
 
-shadow($color = $colorShadowLight, $size = 7px, $withHover = false, $colorDark = null)
-  position relative
+shadow($color = $colorShadowLight, $size = 7px, $withHover = false, $colorDark = null, $position = relative)
+  position $position
   border-radius $borderRadius
   shadowText()
   border none

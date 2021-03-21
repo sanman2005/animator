@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { ECorners } from './constants';
+
 declare module '*.jpg' {
   const content: string;
   export = content;
@@ -23,14 +25,17 @@ interface IEffect {
 }
 
 interface ISpeech {
+  corner: ECorners;
+  size: number;
   text: string;
 }
 
-interface ISceneElement extends IElement, IEffect, ISpeech {
+interface ISceneElement extends IElement, IEffect {
   category: string;
   content: React.ReactNode;
   id: string;
   image: string;
   height: number;
+  speech?: ISpeech;
   width: number;
 }
