@@ -3,13 +3,14 @@ import React from 'react';
 import Icons from 'components/icons';
 
 interface IElementProps {
-  image: string;
+  image?: string;
   onEdit?: () => void;
   onClick: () => void;
   onClickRight?: () => void;
 }
 
 export const Element: React.FC<IElementProps> = ({
+  children,
   image,
   onEdit,
   onClick,
@@ -23,7 +24,7 @@ export const Element: React.FC<IElementProps> = ({
       onClickRight && onClickRight();
     }}
   >
-    <img src={image} alt='' />
+    {children || <img src={image} alt='' />}
 
     {onEdit && (
       <div

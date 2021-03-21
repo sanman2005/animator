@@ -137,7 +137,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
           className='screenElement__image'
           style={{
             animationDuration: `${isEffect ? 1 / element.animationSpeed : 0}s`,
-            backgroundImage: `url(${element.idTemplate})`,
+            backgroundImage: `url(${element.image})`,
             backgroundRepeat: isEffect ? 'repeat' : 'no-repeat',
             backgroundSize: isEffect
               ? `${100 / element.repeatX}% ${100 / element.repeatY}%`

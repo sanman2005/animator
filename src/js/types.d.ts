@@ -22,11 +22,15 @@ interface IEffect {
   repeatY: number;
 }
 
-interface ISceneElement extends IElement, IEffect {
+interface ISpeech {
+  text: string;
+}
+
+interface ISceneElement extends IElement, IEffect, ISpeech {
   category: string;
   content: React.ReactNode;
   id: string;
-  idTemplate: string;
+  image: string;
   height: number;
   width: number;
 }

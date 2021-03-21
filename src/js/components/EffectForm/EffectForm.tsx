@@ -4,15 +4,11 @@ import Form from 'components/Form';
 import { InputNumber } from 'components/Input';
 import Modal from 'components/Modal';
 
-interface IEffectFormResult {
-  animationSpeed: number;
-  repeatX: number;
-  repeatY: number;
-}
+import { IEffect } from "js/types";
 
-interface IEffectFormProps extends IEffectFormResult {
+interface IEffectFormProps extends IEffect {
   onClose: () => void;
-  onSubmit: (result: IEffectFormResult) => void;
+  onSubmit: (result: IEffect) => void;
 }
 
 export const EffectForm: React.FC<IEffectFormProps> = ({

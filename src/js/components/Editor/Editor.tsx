@@ -7,6 +7,7 @@ import { EffectForm } from 'components/EffectForm';
 import { Element } from 'components/Element';
 import { Content } from 'components/Grid';
 import { Screen, ScreenCanvas } from 'components/Screen';
+import { SpeechForm } from 'components/SpeechForm';
 import { TFrame, Timeline } from 'components/Timeline';
 import { Toolbox } from 'components/Toolbox';
 
@@ -20,6 +21,7 @@ const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
 
 const EFFECTS_CATEGORY = 'effects';
+const SPEECH_CATEGORY = 'speech';
 
 const STORAGE_SCENE_KEY = 'scene';
 
@@ -55,22 +57,43 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   screen: HTMLDivElement = null;
   gifEncoder: GIFEncoder = null;
 
-  templatesByCategory = Object.keys(Elements).map(category => ({
-    id: category,
-    content: (
-      <Category
-        content={Elements[category].map((id: string) => (
-          <Element
-            image={id}
-            key={id}
-            onClick={() => this.onToolboxItemClick(id, category)}
-          />
-        ))}
-      >
-        {category}
-      </Category>
-    ),
-  }));
+  templatesByCategory = Object.keys(Elements)
+    .map(category => ({
+      id: category,
+      content: (
+        <Category
+          content={Elements[category].map((id: string) => (
+            <Element
+              image={id}
+              key={id}
+              onClick={() => this.onToolboxItemClick(id, category)}
+            />
+          ))}
+        >
+          {category}
+        </Category>
+      ),
+    }))
+    .concat([
+      {
+        id: SPEECH_CATEGORY,
+        content: (
+          <Category
+            content={
+              <Element
+                onClick={() =>
+                  this.onToolboxItemClick(SPEECH_CATEGORY, SPEECH_CATEGORY)
+                }
+              >
+                Text
+              </Element>
+            }
+          >
+            {SPEECH_CATEGORY}
+          </Category>
+        ),
+      },
+    ]);
 
   componentDidMount() {
     document.addEventListener('keydown', this.onKeyDown);
@@ -94,15 +117,17 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     if (handlers[event.code]) handlers[event.code](event);
   };
 
-  onToolboxItemClick = (templateId: string, category: string) => {
+  onToolboxItemClick = (image: string, category: string) => {
     const id = uuid();
     const isEffect = category === EFFECTS_CATEGORY;
+    const isSpeech = category === SPEECH_CATEGORY;
+
     const screenElement: ISceneElement = {
       animationSpeed: isEffect ? 1 : 0,
       category,
-      content: this.renderElementContent(id, templateId, category),
+      content: null,
       id,
-      idTemplate: templateId,
+      image,
       height: 10,
       width: 10,
       position: { x: 0, y: 0 },
@@ -110,7 +135,10 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       repeatX: 1,
       repeatY: 1,
       rotation: 0,
+      text: isSpeech ? 'Текст' : '',
     };
+
+    screenElement.content = this.renderElementContent(screenElement);
 
     this.addScreenElement(screenElement);
   };
@@ -118,13 +146,18 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   onEditElementStart = () => this.setState({ isElementEditing: true });
   onEditElementEnd = () => this.setState({ isElementEditing: false });
 
-  renderElementContent = (id: string, templateId: string, category: string) => (
+  renderElementContent = ({ category, id, image, text }: ISceneElement) => (
     <Element
-      image={templateId}
+      image={image}
       onClick={() => this.onScreenElementClick(id)}
       onClickRight={() => this.onScreenElementRightClick(id)}
-      onEdit={category === EFFECTS_CATEGORY && this.onEditElementStart}
-    />
+      onEdit={
+        [EFFECTS_CATEGORY, SPEECH_CATEGORY].includes(category) &&
+        this.onEditElementStart
+      }
+    >
+      {text && <div>{text}</div>}
+    </Element>
   );
 
   onScreenElementClick = (id: string) =>
@@ -316,9 +349,9 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     const { frames, sceneElements } = JSON.parse(data) as IEditorState;
 
     sceneElements.forEach(element => {
-      const { category, id, idTemplate } = element;
+      const { id } = element;
 
-      element.content = this.renderElementContent(id, idTemplate, category);
+      element.content = this.renderElementContent(element);
 
       frames.forEach(
         frame => frame[id] && (frame[id].content = element.content),
@@ -432,13 +465,25 @@ class Editor extends React.PureComponent<{}, IEditorState> {
         </Toolbox>
 
         {editingElement && (
-          <EffectForm
-            animationSpeed={editingElement.animationSpeed}
-            onClose={this.onEditElementEnd}
-            onSubmit={this.updateActiveElement}
-            repeatX={editingElement.repeatX}
-            repeatY={editingElement.repeatY}
-          />
+          <>
+            {editingElement.category === EFFECTS_CATEGORY && (
+              <EffectForm
+                animationSpeed={editingElement.animationSpeed}
+                onClose={this.onEditElementEnd}
+                onSubmit={this.updateActiveElement}
+                repeatX={editingElement.repeatX}
+                repeatY={editingElement.repeatY}
+              />
+            )}
+
+            {editingElement.category === SPEECH_CATEGORY && (
+              <SpeechForm
+                onClose={this.onEditElementEnd}
+                onSubmit={this.updateActiveElement}
+                text={editingElement.text}
+              />
+            )}
+          </>
         )}
       </Content>
     );

@@ -26,7 +26,7 @@ class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
     elements.forEach(
       ({
         height,
-        idTemplate,
+        image,
         rotation,
         position,
         repeatX,
@@ -35,14 +35,14 @@ class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
         width,
       }) => {
         const isEffect = repeatX !== 1 || repeatY !== 1;
-        const image = new Image();
+        const img = new Image();
         const koef = 0.01;
         const x = canvas.width * (0.5 + width * position.x * koef * koef);
         const y = canvas.height * (0.5 + height * position.y * koef * koef);
         const angle = (Math.PI / 180) * rotation;
 
-        image.onload = () => {
-          const { naturalHeight, naturalWidth } = image;
+        img.onload = () => {
+          const { naturalHeight, naturalWidth } = img;
           const ratio = naturalWidth / naturalHeight;
           const canvasRatio = canvas.width / canvas.height;
           const correctWidth =
@@ -56,15 +56,15 @@ class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
           context.rotate(angle);
 
           const source = isEffect
-            ? new OffscreenCanvas(image.width * repeatX, image.height * repeatY)
-            : image;
+            ? new OffscreenCanvas(img.width * repeatX, img.height * repeatY)
+            : img;
 
           if (isEffect) {
             const sourceCtx = (source as OffscreenCanvas).getContext('2d');
-            const offset = Math.random() * image.height;
+            const offset = Math.random() * img.height;
 
             sourceCtx.translate(0, offset);
-            sourceCtx.fillStyle = sourceCtx.createPattern(image, 'repeat');
+            sourceCtx.fillStyle = sourceCtx.createPattern(img, 'repeat');
             sourceCtx.fillRect(0, 0, source.width, source.height);
             sourceCtx.translate(0, -offset);
           }
@@ -85,7 +85,7 @@ class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
           if (!waitImagesCount) onDraw(context);
         };
 
-        image.src = idTemplate;
+        img.src = image;
       },
     );
   };
