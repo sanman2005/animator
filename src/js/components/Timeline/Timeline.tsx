@@ -5,7 +5,7 @@ import Button from '../Button';
 
 import Icons from '../icons';
 
-import { ISceneElement } from 'js/types';
+import { ISceneElement } from 'types';
 
 export type TFrame = { [key: string]: ISceneElement };
 

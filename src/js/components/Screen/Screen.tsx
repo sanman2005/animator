@@ -3,7 +3,7 @@ import cn from 'classnames';
 
 import { getMousePosition, vectorsMinus } from 'js/helpers';
 
-import { IElement, ISceneElement, IVector } from 'js/types';
+import { IElement, ISceneElement, IVector } from 'types';
 
 interface IScreenProps {
   activeElementId?: string;

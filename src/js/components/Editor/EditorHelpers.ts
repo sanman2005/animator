@@ -2,7 +2,7 @@ import { vectorsMinus, vectorMulti, vectorsPlus } from '../../helpers';
 
 import { TFrame } from 'components/Timeline';
 
-import { ISceneElement } from 'js/types';
+import { ISceneElement } from 'types';
 
 export const interpolateElementsStates = (
   elements: ISceneElement[],

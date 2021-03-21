@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ISceneElement, IVector } from 'js/types';
+import { ISceneElement, IVector } from 'types';
 
 interface IScreenCanvasProps {
   elements: ISceneElement[];

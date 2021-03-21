@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { IVector } from 'js/types';
+import { IVector } from 'types';
 
 export const env = process.env.NODE_ENV || 'production';
 export const isDev = process.env.NODE_ENV === 'local';

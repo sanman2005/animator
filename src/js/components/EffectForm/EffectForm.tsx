@@ -4,7 +4,7 @@ import Form from 'components/Form';
 import { InputNumber } from 'components/Input';
 import Modal from 'components/Modal';
 
-import { IEffect } from 'js/types';
+import { IEffect } from 'types';
 
 interface IEffectFormProps extends IEffect {
   onClose: () => void;
