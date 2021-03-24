@@ -169,7 +169,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
     return (
       <div
         className={cn(className, 'screenWrapper')}
-        onMouseUpCapture={() =>
+        onClick={() =>
           !draggingElement && !resizingElement && onScreenClick()
         }
         onContextMenuCapture={event => event.preventDefault()}
@@ -180,6 +180,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
             className='screen'
             onMouseMoveCapture={this.onMouseMove}
             onMouseUpCapture={this.stopDrag}
+            onClick={event => event.stopPropagation()}
             style={screenStyle}
           >
             {elements.map(this.renderElement)}
