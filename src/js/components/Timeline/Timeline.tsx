@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import cn from 'classnames';
 
 import Button from '../Button';
@@ -14,6 +14,7 @@ interface ITimelineProps {
   activeFrameIndex: number;
   className?: string;
   frames: TFrame[];
+  onFrameDoubleClick?: (index: number) => void;
   onFrameClick?: (index: number) => void;
   onFrameRightClick?: (index: number) => void;
   onPlay: () => void;
@@ -21,11 +22,12 @@ interface ITimelineProps {
   seconds: number;
 }
 
-export const Timeline: React.FC<ITimelineProps> = ({
+export const Timeline: React.FC<ITimelineProps> = React.memo(({
   activeElementId,
   activeFrameIndex,
   className,
   frames,
+  onFrameDoubleClick,
   onFrameClick,
   onFrameRightClick,
   onPlay,
@@ -35,7 +37,7 @@ export const Timeline: React.FC<ITimelineProps> = ({
   <>
     <div className={cn(className, 'timelineWrapper')}>
       <div className='timeline'>
-        {Array.from(Array(seconds)).map((empty, time) => (
+        {[...Array(seconds)].map((empty, time) => (
           <div
             className='timeline__mark'
             key={time}
@@ -44,6 +46,7 @@ export const Timeline: React.FC<ITimelineProps> = ({
             {time} сек
           </div>
         ))}
+
         {frames.map((frame, index) => (
           <div
             className={cn('timeline__frame', {
@@ -53,6 +56,7 @@ export const Timeline: React.FC<ITimelineProps> = ({
                 : Object.values(frame).length,
             })}
             key={index}
+            onDoubleClick={() => onFrameDoubleClick(index)}
             onClick={() => onFrameClick(index)}
             onContextMenu={event => {
               event.preventDefault();
@@ -81,4 +85,4 @@ export const Timeline: React.FC<ITimelineProps> = ({
       shadow
     />
   </>
-);
+));

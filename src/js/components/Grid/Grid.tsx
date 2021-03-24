@@ -1,9 +1,9 @@
-import * as React from 'react';
+import React from 'react';
 import cn from 'classnames';
 
 interface IGridProps {
   className?: string;
-  children?: any;
+  children?: React.ReactNode;
   title?: string;
 }
 
@@ -28,39 +28,41 @@ type TRef = React.RefObject<HTMLDivElement>;
 export const Container = React.forwardRef<
   HTMLDivElement,
   IGridProps & IContainerProps
->((props: IGridProps & IContainerProps, ref: TRef) => {
-  const {
-    autosize,
-    centerContent,
-    children,
-    className,
-    title,
-    wide,
-    isContent,
-    fill,
-  } = props;
-  const elements = (
-    <>
-      {title && <h2 className='title'>{title}</h2>}
-      {children}
-    </>
-  );
-  const containerClass = cn('container', {
-    content: isContent,
-    'container--top': !centerContent,
-    'container--fill': fill,
-    'container--autosize': autosize,
-  });
-  const sectionClass = cn(className, { [containerClass]: !wide });
+>(
+  (
+    {
+      autosize,
+      centerContent,
+      children,
+      className,
+      title,
+      wide,
+      isContent,
+      fill,
+    },
+    ref: TRef,
+  ) => {
+    const elements = (
+      <>
+        {title && <h2 className='title'>{title}</h2>}
+        {children}
+      </>
+    );
+    const containerClass = cn('container', {
+      content: isContent,
+      'container--top': !centerContent,
+      'container--fill': fill,
+      'container--autosize': autosize,
+    });
+    const sectionClass = cn(className, { [containerClass]: !wide });
 
-  return (
-    <>
+    return (
       <section className={sectionClass} ref={ref}>
         {wide ? <div className={containerClass}>{elements}</div> : elements}
       </section>
-    </>
-  );
-});
+    );
+  },
+);
 
 export const content = React.forwardRef<
   HTMLDivElement,
@@ -69,11 +71,11 @@ export const content = React.forwardRef<
   <Container {...props} isContent ref={ref} />
 ));
 
-export const row = (props: IGridProps) => (
-  <div className={cn('row', props.className)}>{props.children}</div>
+export const row = ({ children, className }: IGridProps) => (
+  <div className={cn('row', className)}>{children}</div>
 );
 
-export const column = (props: ColumnProps & IGridProps) => (
+export const column = (props: IGridProps & ColumnProps) => (
   <div className={cn('column', getColClasses(props), props.className)}>
     {props.children}
   </div>

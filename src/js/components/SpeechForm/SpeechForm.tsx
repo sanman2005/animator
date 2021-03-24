@@ -18,7 +18,7 @@ const CORNERS = Object.keys(ECorners).map(corner => ({
   text: corner,
 }));
 
-export const SpeechForm: React.FC<ISpeechFormProps> = ({
+export const SpeechForm: React.FC<ISpeechFormProps> = React.memo(({
   corner,
   onClose,
   onSubmit,
@@ -39,4 +39,4 @@ export const SpeechForm: React.FC<ISpeechFormProps> = ({
       title='Настройка текста'
     />
   </Modal>
-);
+));

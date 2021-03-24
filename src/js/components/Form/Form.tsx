@@ -57,7 +57,7 @@ interface IFormState {
   validInputsLeft: number;
 }
 
-export default class Form extends React.Component<IFormProps, IFormState> {
+export default class Form extends React.PureComponent<IFormProps, IFormState> {
   static displayName: 'Form';
 
   fields: TFields;
@@ -111,7 +111,10 @@ export default class Form extends React.Component<IFormProps, IFormState> {
 
   initInputs(fields: TFields, validateOnStart: boolean) {
     this.fields = Object.keys(fields).reduce((result: TFields, key, index) => {
-      const newProps: any = { onFocus: this.onFocus, showError: validateOnStart };
+      const newProps: any = {
+        onFocus: this.onFocus,
+        showError: validateOnStart,
+      };
 
       if (!index) {
         this.firstInput = React.createRef<HTMLInputElement>();
@@ -126,7 +129,11 @@ export default class Form extends React.Component<IFormProps, IFormState> {
       this.fields.agree = <CheckBoxAgree required onFocus={this.onFocus} />;
     }
 
-    const { inputs, isValid } = setValidation(this.fields, this.onChange, this.inputsData);
+    const { inputs, isValid } = setValidation(
+      this.fields,
+      this.onChange,
+      this.inputsData,
+    );
 
     this.isValid = isValid;
 
@@ -137,7 +144,7 @@ export default class Form extends React.Component<IFormProps, IFormState> {
 
   onError = (error: string) => {
     this.setState({ error, status: Statuses.ready });
-  }
+  };
 
   onSubmit = (event: React.FormEvent<HTMLButtonElement | HTMLFormElement>) => {
     event.preventDefault();
@@ -154,7 +161,7 @@ export default class Form extends React.Component<IFormProps, IFormState> {
       this.initInputs(fields, true);
       this.setState({ validated: true });
     }
-  }
+  };
 
   onChange = (inputKey: string, results: IValidationResults) => {
     if (!this.inputsData) {
@@ -184,11 +191,14 @@ export default class Form extends React.Component<IFormProps, IFormState> {
     if (newStatus !== status) {
       this.setState({ status: newStatus });
     }
-  }
+  };
 
-  renderForm = (props: any) => this.props.renderAsDiv
-    ? <div {...props} />
-    : <form {...props} onSubmit={this.onSubmit} />
+  renderForm = (props: any) =>
+    this.props.renderAsDiv ? (
+      <div {...props} />
+    ) : (
+      <form {...props} onSubmit={this.onSubmit} />
+    );
 
   render() {
     const {
@@ -204,8 +214,9 @@ export default class Form extends React.Component<IFormProps, IFormState> {
       title,
     } = this.props;
     const { error, status, validated } = this.state;
-    const isButtonDisabled = validated && ![Statuses.ready, Statuses.success].includes(status);
-    const statusesText: { [key: string]: string; } = {
+    const isButtonDisabled =
+      validated && ![Statuses.ready, Statuses.success].includes(status);
+    const statusesText: { [key: string]: string } = {
       [Statuses.sending]: sendingText,
       [Statuses.success]: successText,
       [Statuses.fail]: failText,
@@ -215,7 +226,11 @@ export default class Form extends React.Component<IFormProps, IFormState> {
 
     return (
       <COMPONENT
-        className={cn(className, 'form', `form--${validated ? status : Statuses.ready}`)}
+        className={cn(
+          className,
+          'form',
+          `form--${validated ? status : Statuses.ready}`,
+        )}
       >
         {title && <div className='form__title title'>{title}</div>}
         {this.inputs}
@@ -229,12 +244,16 @@ export default class Form extends React.Component<IFormProps, IFormState> {
                 type={submitType || 'main2'}
                 onClick={this.onSubmit}
                 disabled={isButtonDisabled}
-                shadow />
+                shadow
+              />
             </div>
           )}
-          {buttons && buttons.map((button, index) => (
-            <div className='form__button' key={index}>{button}</div>
-          ))}
+          {buttons &&
+            buttons.map((button, index) => (
+              <div className='form__button' key={index}>
+                {button}
+              </div>
+            ))}
         </div>
       </COMPONENT>
     );

@@ -11,7 +11,7 @@ interface IEffectFormProps extends IEffect {
   onSubmit: (result: IEffect) => void;
 }
 
-export const EffectForm: React.FC<IEffectFormProps> = ({
+export const EffectForm: React.FC<IEffectFormProps> = React.memo(({
   animationSpeed,
   onClose,
   onSubmit,
@@ -54,4 +54,4 @@ export const EffectForm: React.FC<IEffectFormProps> = ({
       title='Настройка эффекта'
     />
   </Modal>
-);
+));

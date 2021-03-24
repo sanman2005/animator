@@ -255,9 +255,9 @@ class Editor extends React.PureComponent<{}, IEditorState> {
 
   deactivateScreenElement = () => this.setState({ activeSceneElementId: null });
 
-  onFrameClick = (index: number) => this.setState({ activeFrameIndex: index });
+  onFrameSelect = (index: number) => this.setState({ activeFrameIndex: index });
 
-  onFrameRightClick = (frameIndex: number) => {
+  onFrameDoubleClick = (frameIndex: number) => {
     const { activeSceneElementId, frames } = this.state;
 
     if (!activeSceneElementId) return;
@@ -267,6 +267,12 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     } else {
       this.addElementToFrame(activeSceneElementId, frameIndex);
     }
+  };
+
+  onFrameRightClick = (frameIndex: number) => {
+    const { activeSceneElementId, frames } = this.state;
+
+    if (!activeSceneElementId) return;
   };
 
   addElementToFrame = (id: string, frameIndex: number) => {
@@ -473,7 +479,8 @@ class Editor extends React.PureComponent<{}, IEditorState> {
             activeElementId={activeSceneElementId}
             activeFrameIndex={activeFrameIndex}
             frames={frames}
-            onFrameClick={this.onFrameClick}
+            onFrameDoubleClick={this.onFrameDoubleClick}
+            onFrameClick={this.onFrameSelect}
             onFrameRightClick={this.onFrameRightClick}
             onPlay={this.onPlay}
             onRecord={this.onRecord}
