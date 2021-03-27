@@ -36,6 +36,9 @@ interface ISceneElement extends IElement, IEffect {
   id: string;
   image: string;
   height: number;
+  lastFrameIndex: number;
   speech?: ISpeech;
   width: number;
 }
+
+type TFrame = { [key: string]: ISceneElement };

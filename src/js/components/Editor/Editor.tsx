@@ -8,7 +8,7 @@ import { Element } from 'components/Element';
 import { Content } from 'components/Grid';
 import { Screen, ScreenCanvas } from 'components/Screen';
 import { SpeechForm } from 'components/SpeechForm';
-import { TFrame, Timeline } from 'components/Timeline';
+import { Timeline } from 'components/Timeline';
 import { Text } from 'components/Text';
 import { Toolbox } from 'components/Toolbox';
 
@@ -16,7 +16,7 @@ import Elements from 'js/elements';
 
 import { interpolateElementsStates } from './EditorHelpers';
 
-import { ISceneElement, IVector } from 'types';
+import { ISceneElement, IVector, TFrame } from 'types';
 import { ECorners } from 'js/constants';
 
 const ANIMATION_SECONDS = 5;
@@ -144,6 +144,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
             size: 10,
           }
         : null,
+      lastFrameIndex: 0,
     };
 
     screenElement.content = this.renderElementContent(screenElement);
@@ -270,9 +271,28 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   };
 
   onFrameRightClick = (frameIndex: number) => {
-    const { activeSceneElementId, frames } = this.state;
+    const { activeSceneElementId, frames, sceneElements } = this.state;
 
     if (!activeSceneElementId) return;
+
+    const elementFirstFrame = frames.findIndex(
+      frame => frame[activeSceneElementId],
+    );
+
+    if (elementFirstFrame >= frameIndex) return;
+
+    const elementIndex = sceneElements.findIndex(
+      ({ id }) => id === activeSceneElementId,
+    );
+    const { lastFrameIndex } = sceneElements[elementIndex];
+    const newSceneElements = [...sceneElements];
+
+    newSceneElements[elementIndex] = {
+      ...sceneElements[elementIndex],
+      lastFrameIndex: lastFrameIndex === frameIndex ? 0 : frameIndex,
+    };
+
+    this.updateScene({ sceneElements: newSceneElements });
   };
 
   addElementToFrame = (id: string, frameIndex: number) => {
@@ -440,10 +460,11 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       screenElementsByFrames,
     } = this.state;
 
+    const activeElement = sceneElements.find(({ id }) => id === activeSceneElementId);
     const editingElement =
       activeSceneElementId &&
       isElementEditing &&
-      sceneElements.find(({ id }) => id === activeSceneElementId);
+      activeElement;
 
     return (
       <Content className='home' centerContent>
@@ -476,7 +497,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
 
         <Toolbox position='bottom'>
           <Timeline
-            activeElementId={activeSceneElementId}
+            activeElement={activeElement}
             activeFrameIndex={activeFrameIndex}
             frames={frames}
             onFrameDoubleClick={this.onFrameDoubleClick}

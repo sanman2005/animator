@@ -1,8 +1,6 @@
 import { vectorsMinus, vectorMulti, vectorsPlus } from '../../helpers';
 
-import { TFrame } from 'components/Timeline';
-
-import { ISceneElement } from 'types';
+import { ISceneElement, TFrame } from 'types';
 
 export const interpolateElementsStates = (
   elements: ISceneElement[],
@@ -44,7 +42,7 @@ export const interpolateElementsStates = (
     }
   };
 
-  elements.forEach(({ id }) => {
+  elements.forEach(({ id, lastFrameIndex }) => {
     // для каждого элемента
     let statePrevFrameIndex: number = null;
 
@@ -52,7 +50,12 @@ export const interpolateElementsStates = (
       if (frame[id]) {
         // идем по кадрам
         if (statePrevFrameIndex !== null) {
-          interpolateState(id, statePrevFrameIndex, frameIndex);
+          // и интерполируем состояние на промежуточные кадры
+          const lastIndex = lastFrameIndex
+            ? Math.min(lastFrameIndex, frameIndex)
+            : frameIndex;
+
+          interpolateState(id, statePrevFrameIndex, lastIndex);
         }
 
         statePrevFrameIndex = frameIndex;
@@ -63,8 +66,12 @@ export const interpolateElementsStates = (
       statePrevFrameIndex !== null &&
       statePrevFrameIndex < frames.length - 1
     ) {
-      // и интерполируем состояние на промежуточные кадры
-      interpolateState(id, statePrevFrameIndex, frames.length);
+      // интерполируем состояние на оставшиеся кадры
+      const lastIndex = lastFrameIndex
+        ? Math.min(lastFrameIndex, frames.length)
+        : frames.length;
+
+      interpolateState(id, statePrevFrameIndex, lastIndex);
     }
   });
 
