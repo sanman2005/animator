@@ -2,6 +2,8 @@ import React from 'react';
 
 import { ISceneElement, IVector } from 'types';
 
+import { drawSpeech } from './helpers';
+
 interface IScreenCanvasProps {
   elements: ISceneElement[];
   onDraw?: (context: CanvasRenderingContext2D) => void;
@@ -20,6 +22,7 @@ class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
     const context = canvas.getContext('2d');
     let waitImagesCount = elements.length;
 
+    context.textBaseline = 'top';
     context.fillStyle = 'white';
     context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -32,9 +35,11 @@ class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
         repeatX,
         repeatY,
         scale,
+        speech,
         width,
       }) => {
         const isEffect = repeatX !== 1 || repeatY !== 1;
+        const isSpeech = speech?.text;
         const img = new Image();
         const koef = 0.01;
         const x = canvas.width * (0.5 + width * position.x * koef * koef);
@@ -69,13 +74,24 @@ class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
             sourceCtx.translate(0, -offset);
           }
 
-          context.drawImage(
-            source,
-            -scaledWidth * 0.5,
-            -scaledHeight * 0.5,
-            scaledWidth,
-            scaledHeight,
-          );
+          if (isSpeech) {
+            drawSpeech({
+              context,
+              height: scaledHeight,
+              speech,
+              width: scaledWidth,
+              x: -scaledWidth * 0.5,
+              y: -scaledHeight * 0.5,
+            });
+          } else {
+            context.drawImage(
+              source,
+              -scaledWidth * 0.5,
+              -scaledHeight * 0.5,
+              scaledWidth,
+              scaledHeight,
+            );
+          }
 
           context.rotate(-angle);
           context.translate(-x, -y);
