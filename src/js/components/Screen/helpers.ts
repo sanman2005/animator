@@ -1,7 +1,11 @@
-import { ISceneElement, ISpeech } from '../../types';
+import { ISceneElement } from '../../types';
 import { ECorners } from 'js/constants';
 
+const fontsHeight: { [key: string]: number } = {};
+
 const getFontHeight = (font: string) => {
+  if (fontsHeight[font]) return fontsHeight[font];
+
   const parent = document.createElement('span');
 
   parent.appendChild(document.createTextNode('height'));
@@ -11,6 +15,8 @@ const getFontHeight = (font: string) => {
   const height = parent.offsetHeight;
 
   document.body.removeChild(parent);
+
+  fontsHeight[font] = height;
 
   return height;
 };
@@ -29,7 +35,7 @@ const drawText = ({
   y: number;
 }) => {
   const lineHeight = getFontHeight(context.font);
-  const words = text.split(' ');
+  const words = text.split(/[ \u8629↵\r\n]/);
   let line = '';
   let top = y;
 
@@ -52,18 +58,19 @@ const drawText = ({
 export const drawSpeech = ({
   context,
   height,
-  speech,
+  element,
   width,
   x,
   y,
 }: {
   context: CanvasRenderingContext2D;
   height: number;
-  speech: ISpeech;
+  element: ISceneElement;
   width: number;
   x: number;
   y: number;
 }) => {
+  const { scale, speech } = element;
   const { corner } = speech;
   const radius = width / 3;
   const radiusLeftTop = corner === ECorners.leftTop ? 0 : radius;
@@ -71,9 +78,9 @@ export const drawSpeech = ({
   const radiusRightTop = corner === ECorners.rightTop ? 0 : radius;
   const radiusRightBottom = corner === ECorners.rightBottom ? 0 : radius;
 
-  context.font = `${speech.size}px sans-serif`;
+  context.font = `${speech.size * scale.x}px sans-serif`;
   context.fillStyle = 'white';
-  context.strokeStyle = 'black';
+  context.lineWidth = 2;
 
   context.beginPath();
 
@@ -95,13 +102,26 @@ export const drawSpeech = ({
   context.closePath();
   context.fill();
   context.stroke();
+  context.fillStyle = 'black';
+  context.lineWidth = 1;
 
-  drawText({ context, x, y, width, text: speech.text });
+  const textPadding = width * 0.1;
+
+  drawText({
+    context,
+    x: x + textPadding,
+    y: y + textPadding,
+    width: width - textPadding * 2,
+    text: speech.text,
+  });
 };
 
 export const drawElement = (
   context: CanvasRenderingContext2D,
-  {
+  element: ISceneElement,
+  img?: HTMLImageElement,
+) => {
+  const {
     height,
     position,
     repeatX,
@@ -110,9 +130,7 @@ export const drawElement = (
     scale,
     speech,
     width,
-  }: ISceneElement,
-  img?: HTMLImageElement,
-) => {
+  } = element;
   const isEffect = repeatX !== 1 || repeatY !== 1;
   const isSpeech = speech?.text;
   const koef = 0.01;
@@ -155,8 +173,8 @@ export const drawElement = (
   if (isSpeech) {
     drawSpeech({
       context,
+      element,
       height: scaledHeight,
-      speech,
       width: scaledWidth,
       x: -scaledWidth * 0.5,
       y: -scaledHeight * 0.5,
