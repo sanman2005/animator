@@ -167,3 +167,15 @@ export const drawElement = (
   context.rotate(-angle);
   context.translate(-x, -y);
 };
+
+export const prepareElementImage = (element: ISceneElement) =>
+  new Promise<HTMLImageElement>(resolve => {
+    const isSpeech = element.speech?.text;
+
+    if (isSpeech) return resolve(null);
+
+    const img = new Image();
+
+    img.onload = () => resolve(img);
+    img.src = element.image;
+  });
