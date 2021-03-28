@@ -1,4 +1,5 @@
 import { ISceneElement, ISpeech } from '../../types';
+import { ECorners } from 'js/constants';
 
 const getFontHeight = (font: string) => {
   const parent = document.createElement('span');
@@ -63,29 +64,35 @@ export const drawSpeech = ({
   x: number;
   y: number;
 }) => {
-  const radius = { tl: width, tr: width, br: width, bl: width };
+  const { corner } = speech;
+  const radius = width / 3;
+  const radiusLeftTop = corner === ECorners.leftTop ? 0 : radius;
+  const radiusLeftBottom = corner === ECorners.leftBottom ? 0 : radius;
+  const radiusRightTop = corner === ECorners.rightTop ? 0 : radius;
+  const radiusRightBottom = corner === ECorners.rightBottom ? 0 : radius;
 
   context.font = `${speech.size}px sans-serif`;
   context.fillStyle = 'white';
   context.strokeStyle = 'black';
 
   context.beginPath();
-  context.moveTo(x + radius.tl, y);
-  context.lineTo(x + width - radius.tr, y);
-  context.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
-  context.lineTo(x + width, y + height - radius.br);
+
+  context.moveTo(x + radiusLeftTop, y);
+  context.lineTo(x + width - radiusRightTop, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + radiusRightTop);
+  context.lineTo(x + width, y + height - radiusRightBottom);
   context.quadraticCurveTo(
     x + width,
     y + height,
-    x + width - radius.br,
+    x + width - radiusRightBottom,
     y + height,
   );
-  context.lineTo(x + radius.bl, y + height);
-  context.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
-  context.lineTo(x, y + radius.tl);
-  context.quadraticCurveTo(x, y, x + radius.tl, y);
-  context.closePath();
+  context.lineTo(x + radiusLeftBottom, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - radiusLeftBottom);
+  context.lineTo(x, y + radiusLeftTop);
+  context.quadraticCurveTo(x, y, x + radiusLeftTop, y);
 
+  context.closePath();
   context.fill();
   context.stroke();
 
