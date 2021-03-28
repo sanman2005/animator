@@ -20,31 +20,38 @@ class ScreenCanvas extends React.PureComponent<IScreenCanvasProps> {
     if (!canvas || !onDraw) return;
 
     const context = canvas.getContext('2d');
-    let drawnElementsCount = elements.length;
-
-    const onDrawElement = (
-      element: ISceneElement,
-      image?: HTMLImageElement,
-    ) => {
-      drawElement(context, element, image);
-
-      if (!--drawnElementsCount) onDraw(context);
-    };
 
     context.textBaseline = 'top';
     context.fillStyle = 'white';
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    elements.forEach(element => {
+    const images = [...Array(elements.length)];
+    let imagesCount = 0;
+
+    const drawElements = () => {
+      elements.forEach((element, index) =>
+        drawElement(context, element, images[index]),
+      );
+
+      onDraw(context);
+    };
+
+    const onLoadImage = () => !--imagesCount && drawElements();
+
+    const prepareImage = (element: ISceneElement, index: number) => {
       const isSpeech = element.speech?.text;
 
-      if (isSpeech) return onDrawElement(element);
+      if (isSpeech) return;
 
       const img = new Image();
 
-      img.onload = () => onDrawElement(element, img);
+      img.onload = () => onLoadImage();
       img.src = element.image;
-    });
+      images[index] = img;
+      imagesCount++;
+    };
+
+    elements.forEach(prepareImage);
   };
 
   render() {
