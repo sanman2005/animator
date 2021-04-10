@@ -240,7 +240,7 @@ export const InputNumber = React.forwardRef<TInput, IInputProps>(
   ),
 );
 
-type TInputFileProps = {
+export type TInputFileProps = {
   accept?: string;
   onInit?: (input: HTMLInputElement) => void;
   onChange: (url: string, file: Blob) => void;

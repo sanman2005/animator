@@ -11,6 +11,7 @@ import { SpeechForm } from 'components/SpeechForm';
 import { Timeline } from 'components/Timeline';
 import { Text } from 'components/Text';
 import { Toolbox } from 'components/Toolbox';
+import { IUploadFormProps, UploadForm } from 'components/UploadForm';
 
 import Elements from 'js/elements';
 
@@ -39,6 +40,7 @@ interface IEditorState {
   recordResolution?: IVector;
   sceneElements?: ISceneElement[];
   screenElementsByFrames?: ISceneElement[][];
+  uploading?: boolean;
 }
 
 class Editor extends React.PureComponent<{}, IEditorState> {
@@ -52,6 +54,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     recordResolution: { x: 0, y: 0 },
     sceneElements: [],
     screenElementsByFrames: [...Array(animationFramesCount)].map(() => []),
+    uploading: false,
   };
 
   playTimeoutId: NodeJS.Timeout = null;
@@ -64,13 +67,19 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       id: category,
       content: (
         <Category
-          content={Elements[category].map((id: string) => (
-            <Element
-              image={id}
-              key={id}
-              onClick={() => this.onToolboxItemClick(id, category)}
-            />
-          ))}
+          content={Elements[category]
+            .map((id: string) => (
+              <Element
+                image={id}
+                key={id}
+                onClick={() => this.onToolboxItemClick(id, category)}
+              />
+            ))
+            .concat(
+              <Element key='+' onClick={() => this.uploadToggle()}>
+                +
+              </Element>,
+            )}
         >
           {category}
         </Category>
@@ -447,6 +456,15 @@ class Editor extends React.PureComponent<{}, IEditorState> {
 
   saveRecord = () => this.gifEncoder.finish();
 
+  uploadToggle = () =>
+    this.setState(({ uploading }) => ({
+      uploading: !uploading,
+    }));
+
+  uploadFile: IUploadFormProps['onLoad'] = (url, file) => {
+    console.log(url);
+  };
+
   render() {
     const {
       activeSceneElementId,
@@ -458,13 +476,14 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       recordResolution,
       sceneElements,
       screenElementsByFrames,
+      uploading,
     } = this.state;
 
-    const activeElement = sceneElements.find(({ id }) => id === activeSceneElementId);
+    const activeElement = sceneElements.find(
+      ({ id }) => id === activeSceneElementId,
+    );
     const editingElement =
-      activeSceneElementId &&
-      isElementEditing &&
-      activeElement;
+      activeSceneElementId && isElementEditing && activeElement;
 
     return (
       <Content className='home' centerContent>
@@ -529,6 +548,10 @@ class Editor extends React.PureComponent<{}, IEditorState> {
               />
             )}
           </>
+        )}
+
+        {uploading && (
+          <UploadForm onClose={this.uploadToggle} onLoad={this.uploadFile} />
         )}
       </Content>
     );
