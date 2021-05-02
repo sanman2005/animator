@@ -5,21 +5,35 @@ import { InputFile, TInputFileProps } from 'components/Input';
 import Modal from 'components/Modal';
 
 export interface IUploadFormProps {
+  category: string;
+  error?: string;
   onClose: () => void;
-  onLoad: TInputFileProps['onChange'];
+  onLoad: (url: string, category: string, file: Blob) => void;
 }
 
 export const UploadForm: React.FC<IUploadFormProps> = React.memo(
-  ({ onClose, onLoad }) => (
-    <Modal onClose={onClose}>
-      <Form
-        fields={{
-          file: <InputFile accept='gif, jpg, jpeg, png' onChange={onLoad} />,
-        }}
-        onSubmit={onClose}
-        sendText='Закрыть'
-        title='Загрузка файла'
-      />
-    </Modal>
-  ),
+  ({ category, error, onClose, onLoad }) => {
+    const onChange = React.useCallback(
+      (url: string, file: Blob) => {
+        onLoad(url, category, file);
+      },
+      [category, onLoad],
+    );
+
+    return (
+      <Modal onClose={onClose}>
+        <Form
+          error={error}
+          fields={{
+            file: (
+              <InputFile accept='gif, jpg, jpeg, png' onChange={onChange} />
+            ),
+          }}
+          onSubmit={onClose}
+          sendText='Закрыть'
+          title='Загрузка файла'
+        />
+      </Modal>
+    );
+  },
 );

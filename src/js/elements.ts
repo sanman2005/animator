@@ -3,7 +3,7 @@ const images = (require as any).context(
   true,
   /\.(png|jpe?g|gif)$/,
 );
-const elements: any = {};
+const elements: { [key: string]: string[] } = {};
 
 images.keys().forEach((fileName: string) => {
   const {

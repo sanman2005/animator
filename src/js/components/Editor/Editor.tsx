@@ -10,12 +10,19 @@ import { Screen, ScreenCanvas } from 'components/Screen';
 import { SpeechForm } from 'components/SpeechForm';
 import { Timeline } from 'components/Timeline';
 import { Text } from 'components/Text';
-import { Toolbox } from 'components/Toolbox';
+import { IToolboxItem, Toolbox } from 'components/Toolbox';
 import { IUploadFormProps, UploadForm } from 'components/UploadForm';
 
-import Elements from 'js/elements';
+import * as fileUploader from 'js/fileLoader';
 
-import { interpolateElementsStates } from './EditorHelpers';
+import {
+  getEncoder,
+  interpolateElementsStates,
+  loadTemplates,
+  SPEECH_CATEGORY,
+  TCategories,
+  TTemplates,
+} from './EditorHelpers';
 
 import { ISceneElement, IVector, TFrame } from 'types';
 import { ECorners } from 'js/constants';
@@ -24,7 +31,6 @@ const ANIMATION_SECONDS = 5;
 const ANIMATION_FRAME_SECONDS = 0.2;
 
 const EFFECTS_CATEGORY = 'effects';
-const SPEECH_CATEGORY = 'speech';
 
 const STORAGE_SCENE_KEY = 'scene';
 
@@ -33,6 +39,7 @@ const animationFramesCount = ANIMATION_SECONDS / ANIMATION_FRAME_SECONDS;
 interface IEditorState {
   activeSceneElementId?: string;
   activeFrameIndex?: number;
+  categories?: IToolboxItem[];
   frames?: TFrame[];
   isElementEditing?: boolean;
   playing?: boolean;
@@ -40,13 +47,17 @@ interface IEditorState {
   recordResolution?: IVector;
   sceneElements?: ISceneElement[];
   screenElementsByFrames?: ISceneElement[][];
+  templates?: TTemplates;
   uploading?: boolean;
+  uploadingCategory?: string;
+  uploadingError?: string;
 }
 
 class Editor extends React.PureComponent<{}, IEditorState> {
   state: IEditorState = {
     activeSceneElementId: null,
     activeFrameIndex: 0,
+    categories: [],
     frames: [...Array(animationFramesCount)].map(() => ({})),
     isElementEditing: false,
     playing: false,
@@ -54,6 +65,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     recordResolution: { x: 0, y: 0 },
     sceneElements: [],
     screenElementsByFrames: [...Array(animationFramesCount)].map(() => []),
+    templates: {},
     uploading: false,
   };
 
@@ -62,59 +74,74 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   screen: HTMLDivElement = null;
   gifEncoder: GIFEncoder = null;
 
-  templatesByCategory = Object.keys(Elements)
-    .map(category => ({
-      id: category,
-      content: (
-        <Category
-          content={Elements[category]
-            .map((id: string) => (
-              <Element
-                image={id}
-                key={id}
-                onClick={() => this.onToolboxItemClick(id, category)}
-              />
-            ))
-            .concat(
-              <Element key='+' onClick={() => this.uploadToggle()}>
-                +
-              </Element>,
-            )}
-        >
-          {category}
-        </Category>
-      ),
-    }))
-    .concat([
-      {
-        id: SPEECH_CATEGORY,
-        content: (
-          <Category
-            content={
-              <Element
-                onClick={() =>
-                  this.onToolboxItemClick(SPEECH_CATEGORY, SPEECH_CATEGORY)
-                }
-              >
-                Text
-              </Element>
-            }
-          >
-            {SPEECH_CATEGORY}
-          </Category>
-        ),
-      },
-    ]);
-
   componentDidMount() {
     document.addEventListener('keydown', this.onKeyDown);
 
-    this.onLoad();
+    this.load();
   }
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.onKeyDown);
   }
+
+  load = async () => {
+    try {
+      const { templates, categories } = await loadTemplates();
+      const categoriesRendered = this.renderCategories(categories);
+
+      this.setState(
+        { categories: categoriesRendered, templates },
+        this.loadScene,
+      );
+    } catch (e) {
+      this.loadScene;
+    }
+  };
+
+  renderCategories = (categories: TCategories) =>
+    Object.keys(categories)
+      .map(category => ({
+        id: category,
+        content: (
+          <Category
+            content={categories[category]
+              .map(({ id, url }) => (
+                <Element
+                  image={url}
+                  key={id}
+                  onClick={() => this.onToolboxItemClick(id, category)}
+                />
+              ))
+              .concat(
+                <Element key='+' onClick={() => this.uploadToggle(category)}>
+                  +
+                </Element>,
+              )}
+          >
+            {category}
+          </Category>
+        ),
+      }))
+      .concat([
+        {
+          id: SPEECH_CATEGORY,
+          content: (
+            <Category
+              content={
+                <Element
+                  onClick={() =>
+                    this.onToolboxItemClick(SPEECH_CATEGORY, SPEECH_CATEGORY)
+                  }
+                >
+                  Text
+                </Element>
+              }
+            >
+              {SPEECH_CATEGORY}
+            </Category>
+          ),
+        },
+      ]);
 
   updateScene = (state: Partial<IEditorState>) =>
     this.setState(state, this.calculateScreenElements);
@@ -128,7 +155,9 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     if (handlers[event.code]) handlers[event.code](event);
   };
 
-  onToolboxItemClick = (image: string, category: string) => {
+  onToolboxItemClick = (templateId: string, category: string) => {
+    const { templates } = this.state;
+    const template = templates[templateId];
     const id = uuid();
     const isEffect = category === EFFECTS_CATEGORY;
     const isSpeech = category === SPEECH_CATEGORY;
@@ -138,14 +167,13 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       category,
       content: null,
       id,
-      image,
       height: 10,
-      width: 10,
+      lastFrameIndex: 0,
       position: { x: 0, y: 0 },
-      scale: { x: 1, y: 1 },
       repeatX: 1,
       repeatY: 1,
       rotation: 0,
+      scale: { x: 1, y: 1 },
       speech: isSpeech
         ? {
             corner: ECorners.leftBottom,
@@ -153,7 +181,8 @@ class Editor extends React.PureComponent<{}, IEditorState> {
             size: 10,
           }
         : null,
-      lastFrameIndex: 0,
+      templateId: template?.id,
+      width: 10,
     };
 
     screenElement.content = this.renderElementContent(screenElement);
@@ -164,9 +193,9 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   onEditElementStart = () => this.setState({ isElementEditing: true });
   onEditElementEnd = () => this.setState({ isElementEditing: false });
 
-  renderElementContent = ({ category, id, image, speech }: ISceneElement) => (
+  renderElementContent = ({ category, id, speech, templateId }: ISceneElement) => (
     <Element
-      image={image}
+      image={this.state.templates[templateId]?.url}
       onClick={() => this.onScreenElementClick(id)}
       onClickRight={() => this.onScreenElementRightClick(id)}
       onEdit={
@@ -339,10 +368,11 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   };
 
   calculateScreenElements = () => {
-    const { frames, sceneElements } = this.state;
+    const { frames, sceneElements, templates } = this.state;
     const screenElementsByFrames = interpolateElementsStates(
       sceneElements,
       frames,
+      templates,
     );
 
     this.setState({ screenElementsByFrames });
@@ -393,7 +423,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     localStorage.setItem(STORAGE_SCENE_KEY, JSON.stringify(data));
   };
 
-  onLoad = () => {
+  loadScene = () => {
     const data = localStorage.getItem(STORAGE_SCENE_KEY);
 
     if (!data) return;
@@ -425,50 +455,44 @@ class Editor extends React.PureComponent<{}, IEditorState> {
 
   onRecord = async () => {
     const { recordResolution } = this.state;
-    const gifEncoder = new GIFEncoder(recordResolution.x, recordResolution.y);
-    // @ts-ignore
-    const file = await window.showSaveFilePicker({
-      types: [
-        {
-          description: 'Gif',
-          accept: { 'image/gif': ['.gif'] },
-        },
-      ],
-    });
-    // @ts-ignore
-    const stream = await file.createWritable();
 
-    stream.on = () => {};
-    stream.once = () => {};
-    stream.emit = () => {};
-    stream.end = () => stream.close();
-
-    gifEncoder.createReadStream().pipe(stream);
-
-    gifEncoder.start();
-    gifEncoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
-    gifEncoder.setDelay(ANIMATION_FRAME_SECONDS * 1000); // frame delay in ms
-    gifEncoder.setQuality(10); // image quality. 10 is default.
-
-    this.gifEncoder = gifEncoder;
+    this.gifEncoder = await getEncoder(
+      recordResolution,
+      ANIMATION_FRAME_SECONDS,
+    );
     this.setState({ activeFrameIndex: 0, recording: true }, this.onPlay);
   };
 
   saveRecord = () => this.gifEncoder.finish();
 
-  uploadToggle = () =>
+  uploadToggle = (category?: string) =>
     this.setState(({ uploading }) => ({
       uploading: !uploading,
+      uploadingCategory: category,
     }));
 
-  uploadFile: IUploadFormProps['onLoad'] = (url, file) => {
-    console.log(url);
+  uploadFile: IUploadFormProps['onLoad'] = async (content, category, file) => {
+    try {
+      await fileUploader.uploadFile(
+        category,
+        content,
+        URL.createObjectURL(file),
+      );
+
+      this.uploadToggle();
+      this.setState({ uploadingError: '' });
+    } catch (error) {
+      this.setState({
+        uploadingError: error?.message || error || 'Ошибка загрузки файла',
+      });
+    }
   };
 
   render() {
     const {
       activeSceneElementId,
       activeFrameIndex,
+      categories,
       frames,
       isElementEditing,
       playing,
@@ -477,6 +501,8 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       sceneElements,
       screenElementsByFrames,
       uploading,
+      uploadingCategory,
+      uploadingError,
     } = this.state;
 
     const activeElement = sceneElements.find(
@@ -504,7 +530,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
           )}
         </Screen>
 
-        <Toolbox items={this.templatesByCategory} position='left' />
+        <Toolbox items={categories} position='left' />
 
         <Toolbox
           activeItemId={activeSceneElementId}
@@ -551,7 +577,12 @@ class Editor extends React.PureComponent<{}, IEditorState> {
         )}
 
         {uploading && (
-          <UploadForm onClose={this.uploadToggle} onLoad={this.uploadFile} />
+          <UploadForm
+            category={uploadingCategory}
+            error={uploadingError}
+            onClose={this.uploadToggle}
+            onLoad={this.uploadFile}
+          />
         )}
       </Content>
     );

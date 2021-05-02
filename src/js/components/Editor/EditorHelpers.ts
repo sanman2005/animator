@@ -1,10 +1,55 @@
-import { vectorsMinus, vectorMulti, vectorsPlus } from '../../helpers';
+import * as React from 'react';
 
-import { ISceneElement, TFrame } from 'types';
+import Elements from 'js/elements';
+import * as fileUploader from 'js/fileLoader';
+import { vectorsMinus, vectorMulti, vectorsPlus } from 'js/helpers';
+
+import { ISceneElement, IVector, TFrame } from 'types';
+import * as GIFEncoder from 'gifencoder';
+
+export const SPEECH_CATEGORY = 'speech';
+
+type TLoadTemplates = () => Promise<{
+  templates: TTemplates;
+  categories: TCategories;
+}>;
+
+type TTemplate = { id: string; url: string };
+export type TTemplates = { [key: string]: TTemplate };
+export type TCategories = { [key: string]: TTemplate[] };
+
+export const loadTemplates: TLoadTemplates = async () => {
+  const templates: TTemplates = {};
+  const categories = Object.keys(Elements).reduce((result, category) => {
+    result[category] = Elements[category].map(url => {
+      templates[url] = {
+        id: url,
+        url,
+      };
+
+      return templates[url];
+    });
+
+    return result;
+  }, {} as TCategories);
+
+  const customFiles = await fileUploader.getFiles();
+
+  customFiles?.forEach(({ category, content, name }) => {
+    templates[name] = {
+      id: name,
+      url: content,
+    };
+    categories[category].push(templates[name]);
+  });
+
+  return { templates, categories };
+};
 
 export const interpolateElementsStates = (
   elements: ISceneElement[],
   frames: TFrame[],
+  templates: TTemplates,
 ) => {
   const elementsByFrames: ISceneElement[][] = frames.map(() => []);
 
@@ -32,6 +77,7 @@ export const interpolateElementsStates = (
     for (let i = frameIndexFrom, step = 0; i < frameIndexTo; i++, step++) {
       elementsByFrames[i].push({
         ...element,
+        image: templates[element.templateId]?.url,
         position: vectorsPlus(
           statePrev.position,
           vectorMulti(stepPosition, step),
@@ -77,4 +123,33 @@ export const interpolateElementsStates = (
   });
 
   return elementsByFrames;
+};
+
+export const getEncoder = async (resolution: IVector, timeInSec: number) => {
+  const encoder = new GIFEncoder(resolution.x, resolution.y);
+  // @ts-ignore
+  const file = await window.showSaveFilePicker({
+    types: [
+      {
+        description: 'Gif',
+        accept: { 'image/gif': ['.gif'] },
+      },
+    ],
+  });
+  // @ts-ignore
+  const stream = await file.createWritable();
+
+  stream.on = () => {};
+  stream.once = () => {};
+  stream.emit = () => {};
+  stream.end = () => stream.close();
+
+  encoder.createReadStream().pipe(stream);
+
+  encoder.start();
+  encoder.setRepeat(0); // 0 for repeat, -1 for no-repeat
+  encoder.setDelay(timeInSec * 1000); // frame delay in ms
+  encoder.setQuality(10); // image quality. 10 is default.
+
+  return encoder;
 };

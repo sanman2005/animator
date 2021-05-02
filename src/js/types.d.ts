@@ -34,10 +34,11 @@ interface ISceneElement extends IElement, IEffect {
   category: string;
   content: React.ReactNode;
   id: string;
-  image: string;
+  image?: string;
   height: number;
   lastFrameIndex: number;
   speech?: ISpeech;
+  templateId: string;
   width: number;
 }
 
