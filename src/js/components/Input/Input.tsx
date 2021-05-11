@@ -6,20 +6,28 @@ import Textarea from 'react-textarea-autosize';
 import {
   Reasons,
   ValidationComponent,
-  IValidationProps, IValidationState,
+  IValidationProps,
+  IValidationState,
 } from '../Validation';
 
-import { emailPattern, namePattern, passwordPattern, phonePattern } from '../../helpers';
+import {
+  emailPattern,
+  namePattern,
+  passwordPattern,
+  phonePattern,
+} from '../../helpers';
+
 import Icons from '../icons';
 import i18n from 'js/i18n';
 
 export const phoneMask = '+7 (999) 999-99-99';
 
 interface IInputProps extends IValidationProps {
+  accept?: string;
   autocomplete?: string;
   className?: string;
   mask?: string;
-  onChange?(value: string, name?: string): void;
+  onChange?(value: string, name?: string, target?: TInput): void;
   onClick?(event: React.FormEvent): void;
   type?: string;
   value?: string;
@@ -47,11 +55,11 @@ export const Input = React.forwardRef<TInput, IInputProps>(
         this.setState({ value });
 
         if (onChange) {
-          onChange(value, name);
+          onChange(value, name, event.currentTarget);
         }
 
         event.currentTarget.focus();
-      }
+      };
 
       onFocus = (event: React.FormEvent<TInput>) => {
         const { onFocus, name } = this.props;
@@ -61,7 +69,7 @@ export const Input = React.forwardRef<TInput, IInputProps>(
         }
 
         return true;
-      }
+      };
 
       render() {
         const {
@@ -104,7 +112,9 @@ export const Input = React.forwardRef<TInput, IInputProps>(
         const input = mask ? (
           <InputMask {...inputParams} mask={mask} />
         ) : isTextarea ? (
-          <Textarea {...inputParams} maxRows={15}>{value}</Textarea>
+          <Textarea {...inputParams} maxRows={15}>
+            {value}
+          </Textarea>
         ) : (
           <input {...inputParams} ref={ref as TRefInput} />
         );
@@ -113,7 +123,9 @@ export const Input = React.forwardRef<TInput, IInputProps>(
           <fieldset className={fieldClass} data-value={value}>
             {input}
             <span className={labelClass}>{label}</span>
-            {error && showError && <span className='input__error'>{error}</span>}
+            {error && showError && (
+              <span className='input__error'>{error}</span>
+            )}
           </fieldset>
         );
       }
@@ -229,7 +241,7 @@ export const InputNumber = React.forwardRef<TInput, IInputProps>(
     <Input
       ref={ref}
       maxLength={6}
-      pattern="^\d+(\.\d+)?$"
+      pattern='^\d+(\.\d+)?$'
       validationTexts={{
         [Reasons.required]: 'Введите число',
         [Reasons.pattern]: 'Это не число',
@@ -242,44 +254,46 @@ export const InputNumber = React.forwardRef<TInput, IInputProps>(
 
 export type TInputFileProps = {
   accept?: string;
-  onInit?: (input: HTMLInputElement) => void;
+  onInit?: (input: TRef) => void;
   onChange: (url: string, file: Blob) => void;
 };
 
-export const InputFile = (props: TInputFileProps) => {
-  const { accept, onChange, onInit } = props;
-  const ref = React.useRef<HTMLInputElement>();
+export const InputFile = React.forwardRef<TInput, TInputFileProps>(
+  ({ accept, onChange, onInit }, ref: TRef) => {
+    React.useEffect(() => {
+      if (onInit && ref) {
+        onInit(ref);
+      }
+    }, [onInit]);
 
-  React.useEffect(() => {
-    if (onInit && ref.current) {
-      onInit(ref.current);
-    }
-  }, [onInit]);
+    const onFileChange: IInputProps['onChange'] = React.useCallback(
+      (event, name, target) => {
+        const file: Blob = (target as HTMLInputElement).files[0];
+        const fileReader = new FileReader();
 
-  const onFileChange = (event: any) => {
-    const file: Blob = event.target.files[0];
-    const fileReader = new FileReader();
+        if (!file) {
+          onChange('', null);
+          return;
+        }
 
-    if (!file) {
-      onChange('', null);
-      return;
-    }
-
-    fileReader.readAsDataURL(file);
-    fileReader.addEventListener(
-      'loadend',
-      (readerEvent: any) => onChange(readerEvent.target.result, file),
+        fileReader.readAsDataURL(file);
+        fileReader.addEventListener('loadend', (readerEvent: any) =>
+          onChange(readerEvent.target.result, file),
+        );
+      },
+      [onChange],
     );
-  };
 
-  return (
-    <input
-      type='file'
-      accept={accept || '.jpg, .jpeg, .png'}
-      onChange={onFileChange}
-      ref={ref} />
-  );
-};
+    return (
+      <Input
+        accept={accept || '.jpg, .jpeg, .png'}
+        onChange={onFileChange}
+        ref={ref}
+        type='file'
+      />
+    );
+  },
+);
 
 type TInputImageProps = {
   label?: string;
@@ -291,7 +305,10 @@ type TInputImageState = {
   url: string;
 } & IValidationState;
 
-export class InputImage extends ValidationComponent<TInputImageProps, TInputImageState> {
+export class InputImage extends ValidationComponent<
+  TInputImageProps,
+  TInputImageState
+> {
   constructor(props: TInputImageProps) {
     super(props);
 
@@ -305,12 +322,17 @@ export class InputImage extends ValidationComponent<TInputImageProps, TInputImag
   onChange = (url: string, file: Blob) => {
     const { onChange, name } = this.props;
 
-    this.setState({ file, url, value: file, validation: this.state.validation });
+    this.setState({
+      file,
+      url,
+      value: file,
+      validation: this.state.validation,
+    });
 
     if (onChange) {
       onChange(file, name);
     }
-  }
+  };
 
   render() {
     const { url } = this.state;
@@ -328,7 +350,8 @@ export class InputImage extends ValidationComponent<TInputImageProps, TInputImag
         {url && (
           <div
             className='input-image-delete'
-            onClick={() => this.onChange('', null)} />
+            onClick={() => this.onChange('', null)}
+          />
         )}
       </fieldset>
     );
