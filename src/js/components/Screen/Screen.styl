@@ -34,7 +34,10 @@ $height = 768px
   user-select none
 
   &--active
-    highlight()
+    highlight($radius: 0)
+
+    &::after
+      z-index 3
 
   > *
     padding 0

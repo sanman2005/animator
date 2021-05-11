@@ -134,24 +134,25 @@ export const drawElement = (
   const isEffect = repeatX !== 1 || repeatY !== 1;
   const isSpeech = speech?.text;
   const koef = 0.01;
-  const x = context.canvas.width * (0.5 + width * position.x * koef * koef);
-  const y = context.canvas.height * (0.5 + height * position.y * koef * koef);
+  const { canvas } = context;
+  const x = canvas.width * (0.5 + width * position.x * koef * koef);
+  const y = canvas.height * (0.5 + height * position.y * koef * koef);
   const angle = (Math.PI / 180) * rotation;
 
   let correctWidth = width;
-  let correctHeight = height;
 
   if (img) {
     const { naturalHeight, naturalWidth } = img;
     const ratio = naturalWidth / naturalHeight;
-    const canvasRatio = context.canvas.width / context.canvas.height;
+    const canvasRatio = canvas.width / canvas.height;
 
-    correctWidth *= ratio >= canvasRatio ? 1 : 1 / canvasRatio;
-    correctHeight *= ratio < canvasRatio ? 1 : canvasRatio;
+    correctWidth *= ratio / canvasRatio;
   }
 
-  const scaledWidth = context.canvas.width * correctWidth * koef * scale.x;
-  const scaledHeight = context.canvas.height * correctHeight * koef * scale.y;
+  const scaledWidth = canvas.width * correctWidth * koef * scale.x;
+  const scaledHeight = canvas.height * height * koef * scale.y;
+  const coordX = -scaledWidth * 0.5;
+  const coordY = -scaledHeight * 0.5;
 
   context.translate(x, y);
   context.rotate(angle);
@@ -176,14 +177,14 @@ export const drawElement = (
       element,
       height: scaledHeight,
       width: scaledWidth,
-      x: -scaledWidth * 0.5,
-      y: -scaledHeight * 0.5,
+      x: coordX,
+      y: coordY,
     });
   } else {
     context.drawImage(
       source,
-      -scaledWidth * 0.5,
-      -scaledHeight * 0.5,
+      coordX,
+      coordY,
       scaledWidth,
       scaledHeight,
     );

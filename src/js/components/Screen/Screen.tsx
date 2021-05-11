@@ -133,17 +133,21 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
         }}
       >
         {element.content}
-        <div
-          className='screenElement__image'
-          style={{
-            animationDuration: `${isEffect ? 1 / element.animationSpeed : 0}s`,
-            backgroundImage: `url(${element.image})`,
-            backgroundRepeat: isEffect ? 'repeat' : 'no-repeat',
-            backgroundSize: isEffect
-              ? `${100 / element.repeatX}% ${100 / element.repeatY}%`
-              : 'contain',
-          }}
-        />
+        {element.image && (
+          <div
+            className='screenElement__image'
+            style={{
+              animationDuration: `${
+                isEffect ? 1 / element.animationSpeed : 0
+              }s`,
+              backgroundImage: `url(${element.image})`,
+              backgroundRepeat: isEffect ? 'repeat' : 'no-repeat',
+              backgroundSize: isEffect
+                ? `${100 / element.repeatX}% ${100 / element.repeatY}%`
+                : 'contain',
+            }}
+          />
+        )}
       </div>
     );
   };
@@ -169,9 +173,7 @@ export class Screen extends React.PureComponent<IScreenProps, IScreenState> {
     return (
       <div
         className={cn(className, 'screenWrapper')}
-        onClick={() =>
-          !draggingElement && !resizingElement && onScreenClick()
-        }
+        onClick={() => !draggingElement && !resizingElement && onScreenClick()}
         onContextMenuCapture={event => event.preventDefault()}
         ref={getRef}
       >
