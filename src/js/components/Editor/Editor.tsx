@@ -3,17 +3,23 @@ import { v4 as uuid } from 'uuid';
 import * as GIFEncoder from 'gifencoder';
 
 import { Category } from 'components/Category';
-import { EffectForm } from 'components/EffectForm';
+import {
+  EffectForm,
+  IUploadFormProps,
+  SpeechForm,
+  TimelineForm,
+  UploadForm,
+} from 'components/Form';
 import { Element } from 'components/Element';
 import { Content } from 'components/Grid';
 import { Screen, ScreenCanvas } from 'components/Screen';
-import { SpeechForm } from 'components/SpeechForm';
 import { Timeline } from 'components/Timeline';
 import { Text } from 'components/Text';
 import { IToolboxItem, Toolbox } from 'components/Toolbox';
-import { IUploadFormProps, UploadForm } from 'components/UploadForm';
 
 import * as fileUploader from 'js/fileLoader';
+
+import { ITimeline } from 'types';
 
 import {
   getEncoder,
@@ -47,7 +53,9 @@ interface IEditorState {
   recordResolution?: IVector;
   sceneElements?: ISceneElement[];
   screenElementsByFrames?: ISceneElement[][];
+  showTimelineForm?: boolean;
   templates?: TTemplates;
+  timeline?: ITimeline;
   uploading?: boolean;
   uploadingCategory?: string;
   uploadingError?: string;
@@ -65,7 +73,12 @@ class Editor extends React.PureComponent<{}, IEditorState> {
     recordResolution: { x: 0, y: 0 },
     sceneElements: [],
     screenElementsByFrames: [...Array(animationFramesCount)].map(() => []),
+    showTimelineForm: false,
     templates: {},
+    timeline: {
+      framesCount: animationFramesCount,
+      time: ANIMATION_SECONDS,
+    },
     uploading: false,
   };
 
@@ -193,7 +206,12 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   onEditElementStart = () => this.setState({ isElementEditing: true });
   onEditElementEnd = () => this.setState({ isElementEditing: false });
 
-  renderElementContent = ({ category, id, speech, templateId }: ISceneElement) => (
+  renderElementContent = ({
+    category,
+    id,
+    speech,
+    templateId,
+  }: ISceneElement) => (
     <Element
       image={this.state.templates[templateId]?.url}
       onClick={() => this.onScreenElementClick(id)}
@@ -379,7 +397,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   };
 
   onPlay = () => {
-    const { frames, playing, recording } = this.state;
+    const { frames, playing, recording, timeline } = this.state;
 
     if (playing) {
       clearInterval(this.playTimeoutId);
@@ -404,7 +422,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
             this.onPlay,
           );
         },
-        recording ? 0 : ANIMATION_FRAME_SECONDS * 1000,
+        recording ? 0 : (timeline.time / timeline.framesCount) * 1000,
       ) as NodeJS.Timeout;
     }
 
@@ -412,13 +430,13 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   };
 
   onSave = (event: KeyboardEvent) => {
-    const { frames, sceneElements } = this.state;
+    const { frames, sceneElements, timeline } = this.state;
 
     if (!event.ctrlKey) return;
 
     event.preventDefault();
 
-    const data = { frames, sceneElements };
+    const data = { frames, sceneElements, timeline };
 
     localStorage.setItem(STORAGE_SCENE_KEY, JSON.stringify(data));
   };
@@ -428,7 +446,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
 
     if (!data) return;
 
-    const { frames, sceneElements } = JSON.parse(data) as IEditorState;
+    const { frames, sceneElements, timeline } = JSON.parse(data) as IEditorState;
 
     sceneElements.forEach(element => {
       const { id } = element;
@@ -440,7 +458,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       );
     });
 
-    this.updateScene({ frames, sceneElements });
+    this.updateScene({ frames, sceneElements, timeline });
   };
 
   setScreen = (node: HTMLDivElement) => {
@@ -464,6 +482,21 @@ class Editor extends React.PureComponent<{}, IEditorState> {
   };
 
   saveRecord = () => this.gifEncoder.finish();
+
+  toggleTimelineForm = () =>
+    this.setState(({ showTimelineForm }) => ({
+      showTimelineForm: !showTimelineForm,
+    }));
+
+  onTimelineChange = (timeline: ITimeline) => {
+    const { frames } = this.state;
+    const newFrames = [...Array(timeline.framesCount)].map(
+      (_, index) => frames[index] || {},
+    );
+
+    this.updateScene({ activeFrameIndex: 0, frames: newFrames, timeline });
+    this.toggleTimelineForm();
+  };
 
   uploadToggle = (category?: string) =>
     this.setState(({ uploading }) => ({
@@ -500,6 +533,8 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       recordResolution,
       sceneElements,
       screenElementsByFrames,
+      showTimelineForm,
+      timeline,
       uploading,
       uploadingCategory,
       uploadingError,
@@ -515,7 +550,7 @@ class Editor extends React.PureComponent<{}, IEditorState> {
       <Content className='home' centerContent>
         <Screen
           activeElementId={activeSceneElementId}
-          animationTime={playing ? ANIMATION_FRAME_SECONDS : 0}
+          animationTime={playing ? timeline.time / timeline.framesCount : 0}
           elements={screenElementsByFrames[activeFrameIndex]}
           getRef={this.setScreen}
           onChangeElement={this.updateScreenElement}
@@ -550,7 +585,8 @@ class Editor extends React.PureComponent<{}, IEditorState> {
             onFrameRightClick={this.onFrameRightClick}
             onPlay={this.onPlay}
             onRecord={this.onRecord}
-            seconds={ANIMATION_SECONDS}
+            onSettings={this.toggleTimelineForm}
+            seconds={timeline.time}
           />
         </Toolbox>
 
@@ -574,6 +610,14 @@ class Editor extends React.PureComponent<{}, IEditorState> {
               />
             )}
           </>
+        )}
+
+        {showTimelineForm && (
+          <TimelineForm
+            {...timeline}
+            onClose={this.toggleTimelineForm}
+            onSubmit={this.onTimelineChange}
+          />
         )}
 
         {uploading && (

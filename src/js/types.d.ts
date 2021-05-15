@@ -43,3 +43,8 @@ interface ISceneElement extends IElement, IEffect {
 }
 
 type TFrame = { [key: string]: ISceneElement };
+
+interface ITimeline {
+  framesCount: number;
+  time: number;
+}

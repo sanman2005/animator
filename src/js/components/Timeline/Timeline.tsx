@@ -17,6 +17,7 @@ interface ITimelineProps {
   onFrameRightClick?: (index: number) => void;
   onPlay: () => void;
   onRecord: () => void;
+  onSettings: () => void;
   seconds: number;
 }
 
@@ -31,6 +32,7 @@ export const Timeline: React.FC<ITimelineProps> = React.memo(
     onFrameRightClick,
     onPlay,
     onRecord,
+    onSettings,
     seconds,
   }) => (
     <>
@@ -68,6 +70,15 @@ export const Timeline: React.FC<ITimelineProps> = React.memo(
           ))}
         </div>
       </div>
+
+      <Button
+        className='timelineButton'
+        icon={<Icons.settings />}
+        onClick={onSettings}
+        shape='circle'
+        type='icon-main'
+        shadow
+      />
 
       <Button
         className='timelineButton'
