@@ -26,9 +26,11 @@ module.exports = {
   mode: isProd ? 'production' : 'development',
   entry: {
     client: path.resolve(srcPath, './js/client.tsx'),
+    serviceWorker: path.resolve(srcPath, './js/serviceWorker.ts'),
   },
   output: {
-    filename: () => `[name].[hash:8].js`,
+    filename: () => `[name].js`,
+    // filename: () => `[name].[hash:8].js`,
     publicPath: '/',
     path: path.resolve(__dirname, '../', buildConfig.buildPath),
   },

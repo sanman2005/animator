@@ -34,3 +34,12 @@ const CLIENT = hot(() => (
 ));
 
 ReactDOM.render(<CLIENT />, document.getElementById(rootId));
+
+navigator?.serviceWorker
+  ?.register('/serviceWorker.js')
+  .then(registration => {
+    console.log('Service worker зарегистрирован:', registration);
+  })
+  .catch(function(error) {
+    console.log('Ошибка при регистрации service worker-а:', error);
+  });
