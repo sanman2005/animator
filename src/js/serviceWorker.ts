@@ -2,6 +2,8 @@
 
 const CACHE_VERSION = 1;
 
+const CACHE_FILES = ['./index.html', './client.js'];
+
 interface ExtendableEvent extends Event {
   request: RequestInfo;
   respondWith(fn: Promise<any>): void;
@@ -9,11 +11,11 @@ interface ExtendableEvent extends Event {
 }
 
 const openCache = () => caches.open(`v${CACHE_VERSION}`);
+const addCache = (cache: Cache) => cache.addAll(CACHE_FILES);
+const createCache = () => openCache().then(addCache);
 
 self.addEventListener('install', (event: ExtendableEvent) =>
-  event.waitUntil(
-    openCache().then(cache => cache.addAll(['./index.html', './client.js'])),
-  ),
+  event.waitUntil(createCache()),
 );
 
 self.addEventListener('activate', event => {
