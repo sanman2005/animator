@@ -111,7 +111,7 @@ export const interpolateElementsStates = (
 
     if (
       statePrevFrameIndex !== null &&
-      statePrevFrameIndex < frames.length - 1
+      statePrevFrameIndex < frames.length
     ) {
       // интерполируем состояние на оставшиеся кадры
       const lastIndex = lastFrameIndex
